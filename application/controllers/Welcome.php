@@ -22,7 +22,8 @@ class Welcome extends CI_Controller
 	public function index()
 	{
 		$session = $this->session->userdata();
-		$token = $session['token'];
+		$token = isset($session['token']) ? $session['token'] : null;
+
 		if ($token == '' || $token == null) {
 			redirect('login');
 			return;
