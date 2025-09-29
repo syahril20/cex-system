@@ -51,7 +51,6 @@ class Auth extends CI_Controller
 	public function check_token()
 	{
 		$token = $this->session->userdata('token');
-		echo "<script>console.log('Debug: ', " . json_encode($token) . ');</script>';
 		if (!$token) {
 			redirect('/');
 		}
