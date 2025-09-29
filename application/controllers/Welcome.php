@@ -22,16 +22,15 @@ class Welcome extends CI_Controller
 	public function index()
 	{
 		$session = $this->session->userdata();
-		if (!$session || !isset($session['token'])) {
-			// $this->load->view('auth/login');
-						redirect('login');
-
+		$token = $session['token'];
+		if ($token == '' || $token == null) {
+			redirect('login');
 			return;
 		}
 
-		$tokens = $this->db->get_where('user_tokens', ['token' => $session['token']])->row();
-		if (!$tokens) {
-			// $this->load->view('auth/login');
+		$tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
+		if (!$tokendb) {
+			$this->session->unset_userdata('token');
 			redirect('login');
 			return;
 		}

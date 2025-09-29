@@ -46,11 +46,12 @@ class Auth extends CI_Controller
 	public function login()
 	{
 		// $this->check_token();
-		$session = $this->session->userdata();
-		if ($session && isset($session['token'])) {
+		$token = $this->session->userdata('token');
+		if ($token != null) {
 			redirect('/');
 			return;
 		}
+		
 		$this->load->view('auth/login');
 	}
 
