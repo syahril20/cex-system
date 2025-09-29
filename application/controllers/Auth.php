@@ -45,8 +45,13 @@ class Auth extends CI_Controller
 	 */
 	public function login()
 	{
-		$this->check_token();
-		// $this->load->view('auth/login');
+		// $this->check_token();
+		$session = $this->session->userdata();
+		if ($session && isset($session['token'])) {
+			redirect('/');
+			return;
+		}
+		$this->load->view('auth/login');
 	}
 
 	public function do_login()
@@ -94,40 +99,23 @@ class Auth extends CI_Controller
 		$this->load->view('test');
 	}
 
-    public function logout()
-    {
-        $token = $this->session->userdata('token');
-
-        // Hapus token dari database jika pakai JWT token
-        if ($token) {
-            $this->db->delete('user_tokens', ['token' => $token]);
-        }
-
-        // Hapus session
-        $this->session->unset_userdata(['token', 'user_id']);
-
-        // Optional: flash message
-        $this->session->set_flashdata('success', 'You have successfully logged out.');
-
-        // Redirect ke halaman login
-        redirect('login');
-    }
-
-	public function check_token()
+	public function logout()
 	{
 		$token = $this->session->userdata('token');
-		if (!$token) {
-			$this->load->view('auth/login');
-			return;
+
+		// Hapus token dari database jika pakai JWT token
+		if ($token) {
+			$this->db->delete('user_tokens', ['token' => $token]);
 		}
 
-		$user = $this->db->get_where('user_tokens', ['token' => $token])->row();
-		if (!$user) {
-			$this->load->view('auth/login');
-			return;
-		}
+		// Hapus session
+		$this->session->unset_userdata(['token', 'user_id']);
 
-		return $user->token;
+		// Optional: flash message
+		$this->session->set_flashdata('success', 'You have successfully logged out.');
+
+		// Redirect ke halaman login
+		redirect('login');
 	}
 
 	public function generate_uuid()
@@ -141,5 +129,5 @@ class Auth extends CI_Controller
 		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 	}
 
-	
+
 }

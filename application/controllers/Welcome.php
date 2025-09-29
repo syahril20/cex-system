@@ -23,12 +23,15 @@ class Welcome extends CI_Controller
 	{
 		$session = $this->session->userdata();
 		if (!$session || !isset($session['token'])) {
-			redirect('login');
+			// $this->load->view('auth/login');
+						redirect('login');
+
 			return;
 		}
 
 		$tokens = $this->db->get_where('user_tokens', ['token' => $session['token']])->row();
 		if (!$tokens) {
+			// $this->load->view('auth/login');
 			redirect('login');
 			return;
 		}
