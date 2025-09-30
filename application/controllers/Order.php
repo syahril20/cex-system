@@ -6,9 +6,10 @@ class Order extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->library('session');
+        if (!isset($this->session)) {
+            $this->load->library('session');
+        }
         $this->load->library('form_validation');
-        // $this->load->library('input');
         $this->load->helper(['url', 'form']);
         // $this->load->database(); // Uncomment if not autoloaded
     }
