@@ -195,6 +195,7 @@ class Order extends CI_Controller
             // Jangan output apapun sebelum redirect untuk menghindari error headers already sent
             redirect('order');
             return;
+        }
         $file_name = $_FILES['filename']['name'];
 
 
