@@ -6,9 +6,7 @@ class Order extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        if (!isset($this->session)) {
-            $this->load->library('session');
-        }
+        $this->load->library('session');
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
         // $this->load->database(); // Uncomment if not autoloaded
@@ -191,13 +189,12 @@ class Order extends CI_Controller
         if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
             $this->session->set_flashdata('error', 'Gagal memuat file upload.');
             // Tambahkan log error ke file log CodeIgniter
+            $this->session->set_flashdata('error', 'Gagal memuat file upload.');
+            // Tambahkan log error ke file log CodeIgniter
             log_message('error', 'File upload gagal: ' . json_encode($_FILES['filename']));
-            // Tambahkan alert JS untuk user (jika redirect ke halaman yang bisa menampilkan flashdata)
-            echo "<script>alert('Gagal memuat file upload. Silakan cek file yang diupload.');</script>";
+            // Jangan output apapun sebelum redirect untuk menghindari error headers already sent
             redirect('order');
             return;
-        }
-        $file = $_FILES['filename']['tmp_name'];
         $file_name = $_FILES['filename']['name'];
 
 
