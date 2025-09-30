@@ -189,6 +189,10 @@ class Order extends CI_Controller
         $airwaybill = $this->input->post('airwaybill');
         if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
             $this->session->set_flashdata('error', 'Gagal memuat file upload.');
+            // Tambahkan log error ke file log CodeIgniter
+            log_message('error', 'File upload gagal: ' . json_encode($_FILES['filename']));
+            // Tambahkan alert JS untuk user (jika redirect ke halaman yang bisa menampilkan flashdata)
+            echo "<script>alert('Gagal memuat file upload. Silakan cek file yang diupload.');</script>";
             redirect('order');
             return;
         }
