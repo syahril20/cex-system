@@ -185,6 +185,7 @@ class Order extends CI_Controller
 
         if (!$airwaybill || !$file) {
             $this->session->set_flashdata('error', 'Airwaybill dan file harus diisi.');
+            redirect('order');
         }
 
         try {
