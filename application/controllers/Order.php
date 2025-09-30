@@ -173,18 +173,18 @@ class Order extends CI_Controller
         $this->load->view('base_page', ['data' => $data]);
     }
 
-    public function do_upload()
+        public function do_upload()
     {
         $airwaybill = $this->input->post('airwaybill');
-        $file = $_FILES['filename']['tmp_name'];
-        $file_name = $_FILES['filename']['name'];
+        $file       = $_FILES['filename']['tmp_name'];
+        $file_name  = $_FILES['filename']['name'];
+
+        echo "<script>console.log(" . json_encode($airwaybill) . ");</script>";
+        echo "<script>console.log(" . json_encode($file) . ");</script>";
+        echo "<script>console.log(" . json_encode($file_name) . ");</script>";
 
         if (!$airwaybill || !$file) {
             $this->session->set_flashdata('error', 'Airwaybill dan file harus diisi.');
-            $this->load->view('order/agent_upload_form', [
-                'order' => $this->db->get_where('orders', ['id' => $this->input->post('order_id')])->row()
-            ]);
-            // redirect('uploadshipment');
         }
 
         try {
@@ -199,7 +199,7 @@ class Order extends CI_Controller
             }
 
             $new_file_name = uniqid() . '_' . $file_name;
-            $destination = $upload_path . $new_file_name;
+            $destination   = $upload_path . $new_file_name;
 
             if (!move_uploaded_file($file, $destination)) {
                 throw new Exception("Gagal menyimpan file ke server lokal.");
@@ -208,24 +208,24 @@ class Order extends CI_Controller
             // Dummy response mirip API eksternal
             $dummyResponse = [
                 "status" => 200,
-                "msg" => "Upload berhasil (dummy)",
-                "data" => [
+                "msg"    => "Upload berhasil (dummy)",
+                "data"   => [
                     "airwaybill" => $airwaybill,
-                    "file_name" => $new_file_name,
-                    "file_path" => base_url('uploads/' . $new_file_name),
-                    "file_type" => mime_content_type($destination),
+                    "file_name"  => $new_file_name,
+                    "file_path"  => base_url('uploads/' . $new_file_name),
+                    "file_type"  => mime_content_type($destination),
                     "uploaded_by" => "system"
                 ]
             ];
 
             // Simpan ke DB
             $insert = [
-                'id' => $this->generate_uuid(),
-                "order_id" => $this->input->post('order_id'),
-                "airwaybill" => $airwaybill,
-                "file_name" => $new_file_name,
-                "file_path" => '/uploads/' . $new_file_name,
-                "file_type" => mime_content_type($destination),
+                'id'          => $this->generate_uuid(),
+                "order_id"    => $this->input->post('order_id'),
+                "airwaybill"  => $airwaybill,
+                "file_name"   => $new_file_name,
+                "file_path"   => '/uploads/' . $new_file_name,
+                "file_type"   => mime_content_type($destination),
                 "uploaded_by" => "system"
             ];
 
