@@ -184,26 +184,23 @@ class Order extends CI_Controller
 
     public function do_upload()
     {
-
         $airwaybill = $this->input->post('airwaybill');
+
         if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
-            $this->session->set_flashdata('error', 'Gagal memuat file upload.');
-            // Tambahkan log error ke file log CodeIgniter
-            $this->session->set_flashdata('error', 'Gagal memuat file upload.');
-            // Tambahkan log error ke file log CodeIgniter
+            $this->session->set_flashdata('error', "<script>alert('Gagal memuat file upload.');</script>");
             log_message('error', 'File upload gagal: ' . json_encode($_FILES['filename']));
-            // Jangan output apapun sebelum redirect untuk menghindari error headers already sent
             redirect('order');
             return;
         }
+
+        $file = $_FILES['filename']['tmp_name'];
         $file_name = $_FILES['filename']['name'];
 
-
-        if (!$airwaybill || !$file) {
+        if (!$airwaybill || !$file_name) {
             $this->session->set_flashdata('error', 'Airwaybill dan file harus diisi.');
             redirect('order');
+            return;
         }
-
         try {
             /**
              * ===========================
