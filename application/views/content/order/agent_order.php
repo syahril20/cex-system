@@ -9,53 +9,12 @@
                         <i class="fas fa-table me-1"></i>
                         DataTable
                     </div>
-                    <a href="<?= site_url('order/order_form') ?>" class="btn btn-success btn-sm">
+                    <a href="<?= site_url('order/create') ?>" class="btn btn-success btn-sm">
                         <i class="fas fa-plus"></i> New Order
                     </a>
                 </div>
 
                 <div class="card-body">
-                    <!-- <?php
-                    // $orders = $this->db->get('orders')->result_array();
-                    if ($this->session->userdata('user')->code === 'SUPER_ADMIN'): ?>
-                        <table id="datatablesSimple">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Airwaybill</th>
-                                    <th>Created At</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Airwaybill</th>
-                                    <th>Created At</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </tfoot>
-                            <tbody>
-                                <?php if (!empty($orders)): ?>
-                                    <?php foreach ($orders as $o): ?>
-                                        <tr>
-                                            <td><?= $o['id'] ?></td>
-                                            <td><?= $o['airwaybill'] ?></td>
-                                            <td><?= $o['created_at'] ?></td>
-                                            <td>
-                                                <a href="<?= site_url('orders/detail/' . $o['id']) ?>"
-                                                    class="btn btn-sm btn-primary">Detail</a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center">Belum ada order</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    <?php endif; ?> -->
 
                     <?php
                     if ($this->session->userdata('user')->code === 'AGENT'): ?>
@@ -86,7 +45,7 @@
                                             <td>
                                                 <a href="<?= site_url('order/detail/' . $o['id']) ?>"
                                                     class="btn btn-sm btn-primary">Detail</a>
-                                                <?php
+                                                <?php echo "<script>console.log(" . json_encode($o) . ");</script>";
                                                 if (!$o['shipment_image']):
                                                     ?>
                                                     <a href="<?= site_url('order/upload_shipment_form/' . $o['id']) ?>"

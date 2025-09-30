@@ -8,10 +8,8 @@
 
                     <a class="nav-link" href="<?= site_url('/') ?>">
                         <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                        <?php echo $page?>
+                        Dashboard
                     </a>
-
-                    <?php echo "<script>console.log('Debugsda: ', " . json_encode($data) . ");</script>"; ?>
 
                     <!-- Variables -->
                     <?php
@@ -40,10 +38,6 @@
                     if ($code === 'AGENT'): ?>
                         <a class="nav-link" href="<?= site_url('/order') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                            Order
-                        </a>
-                        <a class="nav-link" href="<?= site_url('/order') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-regular fa-images"></i></i></div>
                             Order
                         </a>
                     <?php endif; ?>
@@ -80,6 +74,16 @@
         if ($page == 'Order') {
             if ($code === 'AGENT') {
                 $this->load->view('content/order/agent_order');
+            }
+        }
+        if ($page == 'OrderForm') {
+            if ($code === 'AGENT') {
+                $this->load->view('content/order/agent_order_form');
+            }
+        }
+        if ($page == 'OrderDetail') {
+            if ($code === 'AGENT') {
+                $this->load->view('content/order/agent_order_detail');
             }
         }
         // if ($page == 'User') {

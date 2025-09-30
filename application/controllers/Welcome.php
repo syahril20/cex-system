@@ -37,12 +37,11 @@ class Welcome extends CI_Controller
 		}
 	}
 
-	public function Order()
+	public function order()
 	{
 		$session = $this->check_token();
 		$user = $session['user'];
 		$userId = $user->id;
-		
 	
 		$query = $this->db->get_where('orders', ['user_id' => $userId]);
 		$orders = $query->num_rows() > 0 ? $query->result_array() : null;
@@ -85,6 +84,19 @@ class Welcome extends CI_Controller
 			return;
 		}
 
+		$tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
+		if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
+			$this->session->unset_userdata(['token', 'user']);
+			$this->session->set_flashdata('error', 'Session expired. Please login again.');
+			redirect('login');
+			return;
+		}
+
 		return $session;
+	}
+
+	public function error_404()
+	{
+		$this->load->view('errors/404');
 	}
 }

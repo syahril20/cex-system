@@ -51,7 +51,7 @@ class Auth extends CI_Controller
 			redirect('/');
 			return;
 		}
-		
+
 		$this->load->view('auth/login');
 	}
 
@@ -92,13 +92,48 @@ class Auth extends CI_Controller
 
 	public function register()
 	{
-		$this->load->view('test');
+		$roles = $this->db->get('roles')->result();
+		$data['roles'] = $roles;
+		$this->load->view('auth/register', $data);
 	}
 
 	public function do_register()
 	{
-		$this->load->view('test');
+		$username = $this->input->post('username');
+		$email = $this->input->post('email');
+		$password = $this->input->post('password');
+		$role_id = $this->input->post('role_id');
+
+		// Validasi unik
+		if (!$this->User_model->is_unique_username($username)) {
+			$this->session->set_flashdata('error', 'Username sudah dipakai');
+			redirect('auth/register');
+		}
+
+		if (!$this->User_model->is_unique_email($email)) {
+			$this->session->set_flashdata('error', 'Email sudah dipakai');
+			redirect('auth/register');
+		}
+
+		// Insert data
+		$data = [
+			'id' => $this->generate_uuid(),
+			'username' => $username,
+			'email' => $email,
+			'password' => password_hash($password, PASSWORD_BCRYPT),
+			'role_id' => $role_id,
+			'created_by' => 'system'
+		];
+
+		if ($this->User_model->insert_user($data)) {
+			$this->session->set_flashdata('success', 'Register berhasil, silakan login.');
+			redirect('login');
+		} else {
+			$this->session->set_flashdata('error', 'Register gagal.');
+			redirect('register');
+		}
 	}
+
 
 	public function logout()
 	{
