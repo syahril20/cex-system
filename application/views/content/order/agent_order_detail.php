@@ -74,7 +74,7 @@
                             </tr>
                             <tr>
                                 <th>Updated By</th>
-                                <td><?= htmlspecialchars($order['updated_by']) ?></td>
+                                <td><?= isset($order['updated_by']) && $order['updated_by'] !== null ? htmlspecialchars($order['updated_by']) : '' ?></td>
                             </tr>
                             <tr>
                                 <th>Airwaybill</th>
