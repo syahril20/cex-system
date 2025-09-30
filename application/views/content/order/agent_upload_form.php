@@ -13,7 +13,7 @@
 
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="post" action="<?= site_url('order/do_upload'); ?>" enctype="multipart/form-data">
+                    <form method="post" action="<?= site_url('order/do_uploads'); ?>" enctype="multipart/form-data">
                     MEsssii
                         <div class="mb-3">
                             <label class="form-label">Airwaybill</label>

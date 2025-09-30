@@ -59,4 +59,4 @@ $route['order'] = 'order';
 $route['order/create'] = 'order/order_form';
 $route['order/do_create'] = 'order/create';
 $route['order/upload_form'] = 'order/upload_form';
-$route['order/do_upload'] = 'order/do_upload';
+$route['order/do_uploads'] = 'order/do_upload';
