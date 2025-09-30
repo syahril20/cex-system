@@ -37,43 +37,6 @@ class Welcome extends CI_Controller
 		}
 	}
 
-	public function order()
-	{
-		$session = $this->check_token();
-		$user = $session['user'];
-		$userId = $user->id;
-	
-		$query = $this->db->get_where('orders', ['user_id' => $userId]);
-		$orders = $query->num_rows() > 0 ? $query->result_array() : null;
-
-		if ($orders) {
-			foreach ($orders as &$o) {
-				$shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
-				$o['shipment_image'] = $shipment_image;
-			}
-			unset($o);
-		}
-		
-
-		$data['session'] = $session;
-		$data['page'] = 'Order';
-		$data['orders'] = $orders;
-		if ($user->code == 'SUPER_ADMIN') {
-			$this->load->view('superadmin/superadmin_dashboard');
-		}
-		if ($user->code == 'ADMIN') {
-			$this->load->view('admin/admin_dashboard');
-		}
-		if ($user->code == 'AGENT') {
-			$this->load->view('base_page', ['data' => $data]);
-		}
-	}
-
-	// public function dashboard()
-	// {
-	// 	$this->load->view('content/dashboard/agent_dashboard');
-	// }
-
 	private function check_token()
 	{
 		$session = $this->session->userdata();

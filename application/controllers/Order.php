@@ -7,6 +7,37 @@ class Order extends CI_Controller
     {
         $session = $this->check_token();
         $user = $session['user'];
+        $userId = $user->id;
+
+        $query = $this->db->get_where('orders', ['user_id' => $userId]);
+        $orders = $query->num_rows() > 0 ? $query->result_array() : null;
+
+        if ($orders) {
+            foreach ($orders as &$o) {
+                $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
+                $o['shipment_image'] = $shipment_image;
+            }
+            unset($o);
+        }
+
+        $data['session'] = $session;
+        $data['page'] = 'Order';
+        $data['orders'] = $orders;
+        if ($user->code == 'SUPER_ADMIN') {
+            $this->load->view('superadmin/superadmin_dashboard');
+        }
+        if ($user->code == 'ADMIN') {
+            $this->load->view('admin/admin_dashboard');
+        }
+        if ($user->code == 'AGENT') {
+            $this->load->view('base_page', ['data' => $data]);
+        }
+    }
+
+    public function order_form()
+    {
+        $session = $this->check_token();
+        $user = $session['user'];
 
         $data['session'] = $session;
         $data['page'] = 'OrderForm';
@@ -107,8 +138,6 @@ class Order extends CI_Controller
     public function detail($orderId)
     {
         $session = $this->check_token();
-		$user = $session['user'];
-		$userId = $user->id;
 
         $order = $this->db->get_where('orders', ['id' => $orderId])->row();
         if (!$order) {
@@ -124,6 +153,129 @@ class Order extends CI_Controller
         $data['page'] = 'OrderDetail';
 
         $this->load->view('base_page', ['data' => $data]);
+    }
+
+    public function upload_form($orderId)
+    {
+        $session = $this->check_token();
+
+        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        if (!$order) {
+            $this->session->set_flashdata('error', 'Order not found.');
+            redirect('/order');
+        }
+
+        $data = [];
+        $data['session'] = $session;
+        $data['order'] = $order;
+        $data['page'] = 'UploadForm';
+
+        $this->load->view('base_page', ['data' => $data]);
+    }
+
+        public function do_upload()
+    {
+        $airwaybill = $this->input->post('airwaybill');
+        $file       = $_FILES['filename']['tmp_name'];
+        $file_name  = $_FILES['filename']['name'];
+
+        if (!$airwaybill || !$file) {
+            $this->session->set_flashdata('error', 'Airwaybill dan file harus diisi.');
+            redirect('uploadshipment');
+        }
+
+        try {
+            /**
+             * ===========================
+             * MODE DUMMY (aktif sekarang)
+             * ===========================
+             */
+            $upload_path = FCPATH . 'uploads/';
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, true);
+            }
+
+            $new_file_name = uniqid() . '_' . $file_name;
+            $destination   = $upload_path . $new_file_name;
+
+            if (!move_uploaded_file($file, $destination)) {
+                throw new Exception("Gagal menyimpan file ke server lokal.");
+            }
+
+            // Dummy response mirip API eksternal
+            $dummyResponse = [
+                "status" => 200,
+                "msg"    => "Upload berhasil (dummy)",
+                "data"   => [
+                    "airwaybill" => $airwaybill,
+                    "file_name"  => $new_file_name,
+                    "file_path"  => base_url('uploads/' . $new_file_name),
+                    "file_type"  => mime_content_type($destination),
+                    "uploaded_by" => "system"
+                ]
+            ];
+
+            // Simpan ke DB
+            $insert = [
+                'id'          => $this->generate_uuid(),
+                "order_id"    => $this->input->post('order_id'),
+                "airwaybill"  => $airwaybill,
+                "file_name"   => $new_file_name,
+                "file_path"   => '/uploads/' . $new_file_name,
+                "file_type"   => mime_content_type($destination),
+                "uploaded_by" => "system"
+            ];
+
+            $this->db->insert('shipment_images', $insert);
+
+            $this->session->set_flashdata('success', 'Upload berhasil (dummy): ' . json_encode($dummyResponse));
+
+
+            /**
+             * ===========================
+             * MODE REAL (gunakan ini jika mau hit API eksternal)
+             * ===========================
+             */
+            /*
+            $client = new Client();
+            $response = $client->request('POST', 'https://dev.office.cexsystem.com/v2/service/shipment/upload_shipment_image', [
+                'headers' => [
+                    'Authorization' => 'Bearer <JWT_TOKEN>'
+                ],
+                'multipart' => [
+                    [
+                        'name'     => 'airwaybill',
+                        'contents' => $airwaybill
+                    ],
+                    [
+                        'name'     => 'filename',
+                        'contents' => fopen($file, 'r'),
+                        'filename' => $file_name
+                    ]
+                ]
+            ]);
+
+            $result = json_decode($response->getBody()->getContents(), true);
+
+            // Simpan hasil ke DB
+            $insert = [
+                "order_id"    => null,
+                "airwaybill"  => $airwaybill,
+                "file_name"   => $result['data']['file_name'],
+                "file_path"   => $result['data']['file_path'],
+                "file_type"   => $result['data']['file_type'] ?? 'unknown',
+                "uploaded_by" => "system"
+            ];
+
+            $this->db->insert('shipment_images', $insert);
+
+            $this->session->set_flashdata('success', 'Upload berhasil (real API): ' . json_encode($result));
+            */
+        } catch (Exception $e) {
+            $this->session->set_flashdata('error', 'Upload gagal: ' . $e->getMessage());
+        }
+
+        redirect('order');
     }
 
     private function check_token()
@@ -147,14 +299,18 @@ class Order extends CI_Controller
         return $session;
     }
 
-    public function generate_uuid()
+    private function generate_uuid()
     {
-        $data = random_bytes(16);
-        assert(strlen($data) == 16);
-
-        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // Versi 4
-        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // Varian
-
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF)
+        );
     }
 }

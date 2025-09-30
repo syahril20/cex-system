@@ -3,6 +3,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<?php echo "<script>console.log('DebugDA: ', " . json_encode($data) . ');</script>';?>
+<?php echo "<script>console.log('Debug: ', " . json_encode($data['page']) . ');</script>';?>
+
 
 <head>
     <meta charset="utf-8" />
@@ -19,8 +22,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 <body class="sb-nav-fixed">
     <?php $this->load->view('layout/navbar', $data); ?>
 
-    <?php 
-    $this->load->view('layout/sidenav', $data); 
+    <?php
+    $this->load->view('layout/sidenav', $data);
     ?>
 </body>
 

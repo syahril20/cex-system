@@ -6,7 +6,7 @@
             <?php
             // Ambil id dari path (misal: /order_detail/{id})
             $id_order = $this->uri->segment(3); // sesuaikan segment jika perlu
-
+            
             // Query ke database untuk ambil data order
             $query = $this->db->get_where('orders', ['id' => $id_order]);
             $order = $query->row_array();
@@ -74,7 +74,8 @@
                             </tr>
                             <tr>
                                 <th>Updated By</th>
-                                <td><?= isset($order['updated_by']) && $order['updated_by'] !== null ? htmlspecialchars($order['updated_by']) : '' ?></td>
+                                <td><?= isset($order['updated_by']) && $order['updated_by'] !== null ? htmlspecialchars($order['updated_by']) : '' ?>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Airwaybill</th>
@@ -102,9 +103,10 @@
                                         }
                                     }
                                     if (!$hasImage) {
-                                        echo 'No images available or failed to load.<br>';
-                                        // Button upload ulang
-                                        echo '<a href="' . base_url('order/upload_shipment_form/' . $order['id']) . '" class="btn btn-sm btn-primary">Upload Ulang</a>';
+                                        ?>No images available or failed to load.<br>
+                                        <a href="<?= base_url('order/upload_shipment_form/' . $order['id']) ?>"
+                                            class="btn btn-sm btn-primary">Upload Ulang</a>
+                                        <?php
                                     }
                                     ?>
                                 </td>

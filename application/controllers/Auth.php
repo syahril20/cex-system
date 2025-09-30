@@ -154,15 +154,19 @@ class Auth extends CI_Controller
 		redirect('login');
 	}
 
-	public function generate_uuid()
+	private function generate_uuid()
 	{
-		$data = random_bytes(16);
-		assert(strlen($data) == 16);
-
-		$data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // Versi 4
-		$data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // Varian
-
-		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+		return sprintf(
+			'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+			mt_rand(0, 0xFFFF),
+			mt_rand(0, 0xFFFF),
+			mt_rand(0, 0xFFFF),
+			mt_rand(0, 0xFFF) | 0x4000,
+			mt_rand(0, 0x3FFF) | 0x8000,
+			mt_rand(0, 0xFFFF),
+			mt_rand(0, 0xFFFF),
+			mt_rand(0, 0xFFFF)
+		);
 	}
 
 

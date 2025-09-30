@@ -86,6 +86,11 @@
                 $this->load->view('content/order/agent_order_detail');
             }
         }
+        if ($page == 'UploadForm') {
+            if ($code === 'AGENT') {
+                $this->load->view('content/order/agent_upload_form');
+            }
+        }
         // if ($page == 'User') {
         //     $this->load->view('layout/content/user');
         // }

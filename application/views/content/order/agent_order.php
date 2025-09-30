@@ -48,7 +48,7 @@
                                                 <?php echo "<script>console.log(" . json_encode($o) . ");</script>";
                                                 if (!$o['shipment_image']):
                                                     ?>
-                                                    <a href="<?= site_url('order/upload_shipment_form/' . $o['id']) ?>"
+                                                    <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
                                                         class="btn btn-sm btn-warning">Upload Image</a>
                                                 <?php endif; ?>
                                             </td>
