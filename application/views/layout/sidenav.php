@@ -77,21 +77,26 @@
             //     $this->load->view('content/agent_dashboard');
             // }
         }
-        if ($page == 'User') {
-            $this->load->view('layout/content/user');
-        }
         if ($page == 'Order') {
-            $this->load->view('layout/content/order');
+            if ($code === 'AGENT') {
+                $this->load->view('content/order/agent_order');
+            }
         }
-        if ($page == 'OrderDetail') {
-            $this->load->view('layout/content/order_detail');
-        }
-        if ($page == 'OrderForm') {
-            $this->load->view('layout/content/order_form');
-        }
-        if ($page == 'UploadForm') {
-            $this->load->view('layout/content/upload_shipment_form');
-        }
+        // if ($page == 'User') {
+        //     $this->load->view('layout/content/user');
+        // }
+        // if ($page == 'Order') {
+        //     $this->load->view('layout/content/order');
+        // }
+        // if ($page == 'OrderDetail') {
+        //     $this->load->view('layout/content/order_detail');
+        // }
+        // if ($page == 'OrderForm') {
+        //     $this->load->view('layout/content/order_form');
+        // }
+        // if ($page == 'UploadForm') {
+        //     $this->load->view('layout/content/upload_shipment_form');
+        // }
     }
     ?>
 

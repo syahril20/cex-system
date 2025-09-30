@@ -20,7 +20,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <?php $this->load->view('layout/navbar', $data); ?>
 
     <?php 
-    // $this->load->view('layout/sidenav', $data); 
+    $this->load->view('layout/sidenav', $data); 
     ?>
 </body>
 
