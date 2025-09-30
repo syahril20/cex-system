@@ -45,7 +45,7 @@
                                             <td>
                                                 <a href="<?= site_url('order/detail/' . $o['id']) ?>"
                                                     class="btn btn-sm btn-primary">Detail</a>
-                                                <?php echo "<script>console.log(" . json_encode($o) . ");</script>";
+                                                <?php
                                                 if (!$o['shipment_image']):
                                                     ?>
                                                     <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
