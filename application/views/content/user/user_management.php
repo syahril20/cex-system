@@ -51,7 +51,9 @@
                                                     <span class="badge bg-info text-dark"><?= htmlspecialchars($o['role']) ?></span>
                                                 </td>
                                                 <td><?= htmlspecialchars($o['updated_at']) ?></td>
-                                                <td><?= htmlspecialchars($o['updated_by']) ?></td>
+                                                <td>
+                                                    <?= !empty($o['updated_by']) ? htmlspecialchars($o['updated_by']) : '' ?>
+                                                </td>
                                                 <td>
                                                     <?php if ($o['disabled_at']): ?>
                                                         <span class="badge bg-danger"><?= htmlspecialchars($o['disabled_at']) ?></span>

@@ -47,7 +47,7 @@
                                             <td><?= htmlspecialchars($o['created_at']) ?></td>
                                             <td><?= htmlspecialchars($o['created_by']) ?></td>
                                             <td><?= htmlspecialchars($o['updated_at']) ?></td>
-                                            <td><?= htmlspecialchars($o['updated_by']) ?></td>
+                                            <td><?= !empty($o['updated_by']) ? htmlspecialchars($o['updated_by']) : '-' ?></td>
                                             <td>
                                                 <?php
                                                 $status = strtolower($o['status']);
