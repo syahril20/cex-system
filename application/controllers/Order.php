@@ -9,7 +9,7 @@ class Order extends CI_Controller
         $this->load->library('session');
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
-        $this->load->helper('activity');
+        $this->load->helper(['activity', 'utils']);
         $this->load->model('Master_model');
 
         // $this->load->database(); // Uncomment if not autoloaded
@@ -17,7 +17,7 @@ class Order extends CI_Controller
 
     public function index()
     {
-        $session = $this->check_token();
+        $session = check_token();
         $user = $session['user'];
         $userId = $user->id;
 
@@ -64,7 +64,7 @@ class Order extends CI_Controller
 
     public function order_form()
     {
-        $session = $this->check_token();
+        $session = check_token();
         $user = $session['user'];
 
         $data['session'] = $session;
@@ -181,7 +181,7 @@ class Order extends CI_Controller
 
     public function detail($orderId)
     {
-        $session = $this->check_token();
+        $session = check_token();
 
         $user = $session['user'];
         $order = $this->db->get_where('orders', [
@@ -211,7 +211,7 @@ class Order extends CI_Controller
 
     public function upload_form($orderId)
     {
-        $session = $this->check_token();
+        $session = check_token();
 
         $user = $session['user'];
         $order = $this->db->get_where('orders', [
@@ -386,35 +386,35 @@ class Order extends CI_Controller
         redirect('order');
     }
 
-    private function check_token()
-    {
-        $session = $this->session->userdata();
-        $token = isset($session['token']) ? $session['token'] : null;
+    // private function check_token()
+    // {
+    //     $session = $this->session->userdata();
+    //     $token = isset($session['token']) ? $session['token'] : null;
 
-        if ($token == '' || $token == null) {
-            redirect('login');
-            $this->session->set_flashdata('swal', [
-                'title' => 'Gagal!',
-                'text' => 'Session tidak ditemukan.',
-                'icon' => 'error'
-            ]);
-            return;
-        }
+    //     if ($token == '' || $token == null) {
+    //         redirect('login');
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Gagal!',
+    //             'text' => 'Session tidak ditemukan.',
+    //             'icon' => 'error'
+    //         ]);
+    //         return;
+    //     }
 
-        $tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
-        if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
-            $this->session->unset_userdata(['token', 'user']);
-            $this->session->set_flashdata('swal', [
-                'title' => 'Gagal!',
-                'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
-                'icon' => 'error'
-            ]);
-            redirect('login');
-            return;
-        }
+    //     $tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
+    //     if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
+    //         $this->session->unset_userdata(['token', 'user']);
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Gagal!',
+    //             'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
+    //             'icon' => 'error'
+    //         ]);
+    //         redirect('login');
+    //         return;
+    //     }
 
-        return $session;
-    }
+    //     return $session;
+    // }
 
     public function test_guzzle()
     {

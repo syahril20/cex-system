@@ -51,18 +51,19 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
-                        <?php if (!empty($data['recent_activities'])): ?>
-                            <ul>
-                                <?php foreach ($data['recent_activities'] as $activity): ?>
-                                    <li>
-                                        <?php echo htmlspecialchars($activity['user']); ?> -
-                                        <?php echo htmlspecialchars($activity['activity']); ?> -
-                                        <?php echo htmlspecialchars($activity['timestamp']); ?>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
+                        <?php if (!empty($recent_activities)): ?>
+                            <?php foreach ($recent_activities as $activity): ?>
+                                <li class="list-group-item">
+                                    <strong>User ID:</strong> <?= htmlspecialchars($activity['user_id']) ?> <br>
+                                    <strong>Action:</strong> <?= htmlspecialchars($activity['action']) ?> <br>
+                                    <strong>Description:</strong> <?= htmlspecialchars($activity['description']) ?> <br>
+                                    <strong>IP:</strong> <?= htmlspecialchars($activity['ip_address']) ?> <br>
+                                    <strong>User Agent:</strong> <?= htmlspecialchars($activity['user_agent']) ?> <br>
+                                    <strong>Waktu:</strong> <?= htmlspecialchars($activity['created_at']) ?>
+                                </li>
+                            <?php endforeach; ?>
                         <?php else: ?>
-                            <p>Tidak ada aktivitas terbaru.</p>
+                            <li class="list-group-item">Tidak ada aktivitas terbaru.</li>
                         <?php endif; ?>
                     </ul>
                 </div>

@@ -110,6 +110,21 @@
                 $this->load->view('content/order/agent_upload_form');
             }
         }
+        if ($page == 'UserManagement') {
+            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                $this->load->view('content/user/user_management');
+            }
+        }
+        if ($page == 'UserEdit') {
+            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                $this->load->view('content/user/user_edit');
+            }
+        }
+        if ($page == 'UserCreate') {
+            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                $this->load->view('content/user/user_create');
+            }
+        }
         // if ($page == 'User') {
         //     $this->load->view('layout/content/user');
         // }

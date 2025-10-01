@@ -29,7 +29,7 @@ class User_model extends CI_Model
 
     public function get_by_email($email)
     {
-        $this->db->select('users.id, users.username, users.email, users.password, roles.name as role, roles.code');
+        $this->db->select('users.id, users.username, users.email, users.password, roles.name as role, roles.code, users.disabled_at');
         $this->db->from('users');
         $this->db->join('roles', 'roles.id = users.role_id', 'left');
         $this->db->where('users.email', $email);
@@ -46,5 +46,33 @@ class User_model extends CI_Model
     public function insert($data)
     {
         return $this->db->insert($this->table, $data);
+    }
+
+    public function get_all_users_except($currentUserId)
+    {
+        $this->db->select('users.id, users.username, users.email, roles.name as role, roles.code, 
+        users.created_at, users.created_by, users.updated_at, users.updated_by, users.disabled_at');
+        $this->db->from('users');
+        $this->db->join('roles', 'roles.id = users.role_id', 'left');
+        $this->db->where('users.id !=', $currentUserId);
+        return $this->db->get()->result_array();
+    }
+
+    public function update($id, $data)
+    {
+        $this->db->where('id', $id);
+        return $this->db->update($this->table, $data);
+    }
+
+    public function soft_delete_user($id, $updated_by)
+    {
+        $data = [
+            'disabled_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+            'updated_by' => $updated_by,
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600)
+        ];
+
+        $this->db->where('id', $id);
+        $this->db->update('users', $data);
     }
 }

@@ -38,7 +38,6 @@ class Welcome extends CI_Controller
 		// Ambil 10 aktivitas terbaru dari tabel 'activity'
 		$data['recent_activities'] = $this->db
 			->order_by('created_at', 'DESC')
-			->limit(10)
 			->get('activity')
 			->result_array();
 		if ($user->code == 'SUPER_ADMIN') {

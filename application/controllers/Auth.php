@@ -26,7 +26,6 @@ class Auth extends CI_Controller
 		$this->load->library('session');
 		$this->load->library('JwtAuth');
 		$this->load->helper('security');
-		$this->load->helper('activity');
 	}
 
 	/**
@@ -72,6 +71,17 @@ class Auth extends CI_Controller
 			redirect('login');
 		}
 
+
+		// Cek jika akun ditangguhkan
+		if (!empty($user->disabled_at)) {
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Akun Anda ditangguhkan, harap hubungi admin.',
+				'icon' => 'error'
+			]);
+			redirect('login');
+		}
+
 		// Buat JWT
 		$this->load->library('JwtAuth');
 		$token = $this->jwtauth->generate_token($user);
@@ -99,8 +109,6 @@ class Auth extends CI_Controller
 			'text' => 'Login berhasil.',
 			'icon' => 'success'
 		]);
-
-		log_activity($this, 'login', 'User ' . $user->email . ' berhasil login.');
 
 		redirect('/');  // atau halaman utama
 	}

@@ -1,62 +1,48 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
 | URI ROUTING
 | -------------------------------------------------------------------------
 | This file lets you re-map URI requests to specific controller functions.
-|
-| Typically there is a one-to-one relationship between a URL string
-| and its corresponding controller class/method. The segments in a
-| URL normally follow this pattern:
-|
-|	example.com/class/method/id/
-|
-| In some instances, however, you may want to remap this relationship
-| so that a different class/function is called than the one
-| corresponding to the URL.
-|
 | Please see the user guide for complete details:
-|
-|	https://codeigniter.com/userguide3/general/routing.html
-|
+| https://codeigniter.com/userguide3/general/routing.html
 | -------------------------------------------------------------------------
 | RESERVED ROUTES
 | -------------------------------------------------------------------------
-|
-| There are three reserved routes:
-|
-|	$route['default_controller'] = 'welcome';
-|
-| This route indicates which controller class should be loaded if the
-| URI contains no data. In the above example, the "welcome" class
-| would be loaded.
-|
-|	$route['404_override'] = 'errors/page_missing';
-|
-| This route will tell the Router which controller/method to use if those
-| provided in the URL cannot be matched to a valid route.
-|
-|	$route['translate_uri_dashes'] = FALSE;
-|
-| This is not exactly a route, but allows you to automatically route
-| controller and method names that contain dashes. '-' isn't a valid
-| class or method name character, so it requires translation.
-| When you set this option to TRUE, it will replace ALL dashes in the
-| controller and method URI segments.
-|
-| Examples:	my-controller/index	-> my_controller/index
-|		my-controller/my-method	-> my_controller/my_method
 */
+
 $route['default_controller'] = 'welcome';
 $route['404_override'] = 'welcome/error_404';
 $route['translate_uri_dashes'] = FALSE;
+
+// Auth routes
 $route['login'] = 'auth/login';
 $route['register'] = 'auth/register';
+
+// Dashboard
 $route['dashboard'] = 'welcome/dashboard';
+
+// Order routes
 $route['order'] = 'order';
 $route['order/create'] = 'order/order_form';
 $route['order/do_create'] = 'order/create';
 $route['order/upload_form'] = 'order/upload_form';
 $route['order/do_uploads'] = 'order/do_upload';
+
+// User
+$route['user'] = 'user';
+$route['user/edit'] = 'user/user_edit';
+$route['user/do_edit/(:num)'] = 'user/do_edit/$1';
+$route['user/delete/(:num)'] = 'user/delete/$1';
+
+// Roles 
+$route['role'] = 'role';
+$route['role/create'] = 'role/role_form';
+$route['role/do_create'] = 'role/create';
+$route['role/edit/(:num)'] = 'role/role_edit/$1';
+$route['role/do_edit/(:num)'] = 'role/do_edit/$1';
+$route['role/delete/(:num)'] = 'role/delete/$1';
+
+// 
