@@ -2,7 +2,7 @@
     .stat-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s;
         cursor: pointer;
-        border-radius: 0.75rem; /* rounded-3 */
+        border-radius: 0.75rem;
     }
 
     .stat-card:hover {
@@ -34,37 +34,27 @@
             <!-- Judul Dashboard -->
             <h1 class="mt-4 mb-4">
                 <i class="fas fa-tachometer-alt me-2 text-primary"></i>
-                Dashboard Super Admin
+                Dashboard Admin
             </h1>
 
             <!-- Statistik -->
             <div class="row mb-4">
+                <!-- Total Agen -->
                 <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-4">
                     <div class="card bg-primary text-white stat-card shadow-sm h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="fw-semibold">Total Pengguna</h6>
-                                <h3 class="fw-bold"><?= $total_users ?? 0 ?></h3>
+                                <h6 class="fw-semibold">Total Agen</h6>
+                                <h3 class="fw-bold"><?= $total_agents ?? 0 ?></h3>
                             </div>
                             <i class="fas fa-users stat-icon"></i>
                         </div>
                     </div>
                 </div>
 
+                <!-- Total Transaksi -->
                 <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-4">
                     <div class="card bg-success text-white stat-card shadow-sm h-100">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="fw-semibold">Total Admin</h6>
-                                <h3 class="fw-bold"><?= $total_admin ?? 0 ?></h3>
-                            </div>
-                            <i class="fas fa-user-shield stat-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-4">
-                    <div class="card bg-warning text-dark stat-card shadow-sm h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="fw-semibold">Total Transaksi</h6>
@@ -75,6 +65,20 @@
                     </div>
                 </div>
 
+                <!-- Transaksi Pending -->
+                <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-4">
+                    <div class="card bg-warning text-dark stat-card shadow-sm h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-semibold">Transaksi Pending</h6>
+                                <h3 class="fw-bold"><?= $total_pending ?? 0 ?></h3>
+                            </div>
+                            <i class="fas fa-clock stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Laporan / Notifikasi -->
                 <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-4">
                     <div class="card bg-danger text-white stat-card shadow-sm h-100">
                         <div class="card-body d-flex justify-content-between align-items-center">
@@ -154,10 +158,8 @@
             const table = document.getElementById("datatablesSimple");
             if (table) {
                 new simpleDatatables.DataTable(table, {
-                    searchable: false,
-                    sortable: false,
-                    paging: false,
-                    perPage: 5
+                    searchable: true,
+                    sortable: false
                 });
             }
         });

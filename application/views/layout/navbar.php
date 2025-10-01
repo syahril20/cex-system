@@ -40,7 +40,7 @@
     }
 </style>
 
-<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark" data-bs-theme="light">
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="<?= site_url('/') ?>">
         <i class="fas fa-shipping-fast me-1"></i> Cex
@@ -57,13 +57,7 @@
 
     <!-- Navbar Search-->
     <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
-                aria-describedby="btnNavbarSearch" />
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
+
     </form>
 
     <!-- Navbar-->
@@ -74,7 +68,7 @@
                 <i class="fas fa-user-circle fa-lg"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#!"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                <li><a class="dropdown-item" href="<?= site_url('profile') ?>"><i class="fas fa-user me-2"></i> Profile</a></li>
                 <li><a class="dropdown-item" href="#!"><i class="fas fa-list-alt me-2"></i> Activity Log</a></li>
                 <li>
                     <hr class="dropdown-divider" />

@@ -26,7 +26,6 @@ class User extends CI_Controller
         } else {
             $users = [];
         }
-        $user = $session['user'];
 
         $data['session'] = $session;
         $data['users'] = !empty($users) ? $users : [];
@@ -74,22 +73,42 @@ class User extends CI_Controller
             return;
         }
 
-        // Ambil data dari form (misal: username, email, role_id, dll)
+        $email = $this->input->post('email');
+        $username = $this->input->post('username');
+
+        // validasi duplikat
+        if ($this->User_model->get_by_email($email)) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Email sudah digunakan!',
+                'icon' => 'error'
+            ]);
+            redirect('user/create');
+            return;
+        }
+
         $data = [
             'id' => generate_uuid(),
-            'username' => $this->input->post('username'),
-            'email' => $this->input->post('email'),
+            'username' => $username,
+            'email' => $email,
             'role_id' => $role_id,
             'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
             'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
-            'created_by' => $session['user']->username
+            'created_by' => $session['user']->username ?? 'system'
         ];
 
-        log_activity($this, 'create_user', 'Membuat user baru dengan email: ' . $data['email']);
-
         $this->User_model->insert($data);
+
+        log_activity($this, 'create_user', 'Membuat user baru dengan email: ' . $email);
+
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'User baru berhasil ditambahkan.',
+            'icon' => 'success'
+        ]);
         redirect('user');
     }
+
 
     public function edit($id)
     {

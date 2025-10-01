@@ -1,13 +1,15 @@
 <style>
     footer {
         font-size: 0.85rem;
-        box-shadow: 0 -1px 4px rgba(0,0,0,0.08);
+        box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.08);
     }
+
     footer a {
         text-decoration: none;
         color: #0d6efd;
         transition: color 0.2s ease-in-out;
     }
+
     footer a:hover {
         color: #0a58ca;
         text-decoration: underline;
@@ -27,16 +29,4 @@
     </div>
 </footer>
 
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<?php if ($this->session->flashdata('swal')): ?>
-    <script>
-        Swal.fire({
-            title: '<?= $this->session->flashdata("swal")["title"] ?>',
-            text: '<?= $this->session->flashdata("swal")["text"] ?>',
-            icon: '<?= $this->session->flashdata("swal")["icon"] ?>',
-            confirmButtonText: 'OK'
-        });
-    </script>
-<?php endif; ?>
+<?php $this->load->view('components/alert'); ?>

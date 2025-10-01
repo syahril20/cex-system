@@ -3,15 +3,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Welcome extends CI_Controller
 {
-
 	/**
 	 * Index Page for this controller.
 	 *
 	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
+	 *      http://example.com/index.php/welcome
+	 *  - or -
+	 *      http://example.com/index.php/welcome/index
+	 *  - or -
 	 * Since this controller is set as the default controller in
 	 * config/routes.php, it's displayed at http://example.com/
 	 *
@@ -34,6 +33,7 @@ class Welcome extends CI_Controller
 			? (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users')
 			: 0;
 		$data['total_orders'] = (int) $this->db->count_all('orders') ?: 0;
+
 		$this->db->select('activity.*, users.username');
 		$this->db->from('activity');
 		$this->db->join('users', 'users.id = activity.user_id', 'left');
@@ -41,17 +41,10 @@ class Welcome extends CI_Controller
 		$this->db->order_by('activity.created_at', 'DESC');
 		$activities = $this->db->get()->result_array();
 
-		
 		$data['recent_activities'] = $activities;
-		if ($user->code == 'SUPER_ADMIN') {
-			$this->load->view('base_page', ['data' => $data]);
-		}
-		if ($user->code == 'ADMIN') {
-			$this->load->view('admin/admin_dashboard');
-		}
-		if ($user->code == 'AGENT') {
-			$this->load->view('base_page', ['data' => $data]);
-		}
+
+		$this->load->view('base_page', ['data' => $data]);
+
 	}
 
 	private function check_token()

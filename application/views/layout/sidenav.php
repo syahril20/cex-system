@@ -69,16 +69,16 @@
                         <div class="sb-sidenav-menu-heading">Control</div>
                         <a class="nav-link <?= ($page == 'UserManagement' || $page == 'UserEdit' || $page == 'UserCreate') ? 'active' : '' ?>"
                             href="<?= site_url('/user') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user-shield"></i></div>
                             User
                         </a>
                         <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-flag"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user-tag"></i></div>
                             Roles
                         </a>
                         <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail') ? 'active' : '' ?>"
                             href="<?= site_url('/order') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
                         </a>
                     <?php endif; ?>
@@ -86,16 +86,18 @@
                     <!-- Admin -->
                     <?php if ($code === 'ADMIN'): ?>
                         <div class="sb-sidenav-menu-heading">Control</div>
-                        <a class="nav-link" href="<?= site_url('/user') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
+                        <a class="nav-link <?= ($page == 'UserManagement' || $page == 'UserEdit' || $page == 'UserCreate') ? 'active' : '' ?>"
+                            href="<?= site_url('/user') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user-gear"></i></div>
                             User
                         </a>
-                        <a class="nav-link" href="<?= site_url('/roles') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-flag"></i></div>
+                        <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user-lock"></i></div>
                             Roles
                         </a>
-                        <a class="nav-link" href="<?= site_url('/order') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                        <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail') ? 'active' : '' ?>"
+                            href="<?= site_url('/order') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
                         </a>
                     <?php endif; ?>
@@ -105,7 +107,7 @@
                         <div class="sb-sidenav-menu-heading">Order</div>
                         <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail' || $page == 'OrderForm' || $page == 'UploadForm') ? 'active' : '' ?>"
                             href="<?= site_url('/order') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
                         </a>
                     <?php endif; ?>
@@ -122,8 +124,11 @@
     <?php
     if (isset($page) && ($page != null || $page == '')) {
         if ($page == 'Dashboard') {
-            if ($this->session->userdata('user')->code === 'SUPER_ADMIN') {
+            if ($code === 'SUPER_ADMIN') {
                 $this->load->view('content/dashboard/superadmin_dashboard');
+            }
+            if ($code === 'ADMIN') {
+                $this->load->view('content/dashboard/admin_dashboard');
             }
             if ($code === 'AGENT') {
                 $this->load->view('content/dashboard/agent_dashboard');
@@ -175,6 +180,10 @@
                 $this->load->view('content/user/user_create');
             }
         }
+        if ($page == 'Profile') {
+            $this->load->view('profile/index');
+        }
+
     }
     ?>
 </div>

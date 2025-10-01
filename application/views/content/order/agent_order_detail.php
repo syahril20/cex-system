@@ -37,14 +37,7 @@
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-bordered table-sm table-striped mb-0">
-                            <tr>
-                                <th style="width:180px;">ID Order</th>
-                                <td><?= htmlspecialchars($order['id']) ?></td>
-                            </tr>
-                            <tr>
-                                <th>User ID</th>
-                                <td><?= htmlspecialchars($order['user_id']) ?></td>
-                            </tr>
+
                             <tr>
                                 <th>Airwaybill</th>
                                 <td><?= htmlspecialchars($order['airwaybill']) ?></td>
@@ -69,18 +62,12 @@
                                 <th>Created At</th>
                                 <td><?= htmlspecialchars($order['created_at']) ?></td>
                             </tr>
-                            <tr>
-                                <th>Updated At</th>
-                                <td><?= htmlspecialchars($order['updated_at']) ?></td>
-                            </tr>
+
                             <tr>
                                 <th>Created By</th>
                                 <td><?= htmlspecialchars($order['created_by']) ?></td>
                             </tr>
-                            <tr>
-                                <th>Updated By</th>
-                                <td><?= htmlspecialchars($order['updated_by'] ?? '') ?></td>
-                            </tr>
+
                         </table>
                     </div>
                 </div>
@@ -120,7 +107,8 @@
                                                                         <?php foreach ($detail as $dKey => $dVal): ?>
                                                                             <tr>
                                                                                 <th style="width:150px;">
-                                                                                    <?= ucwords(str_replace('_', ' ', $dKey)) ?></th>
+                                                                                    <?= ucwords(str_replace('_', ' ', $dKey)) ?>
+                                                                                </th>
                                                                                 <td><?= htmlspecialchars($dVal) ?></td>
                                                                             </tr>
                                                                         <?php endforeach; ?>
@@ -168,7 +156,7 @@
                                             <img src="<?= htmlspecialchars($img_url) ?>" class="img-thumbnail"
                                                 style="max-width:120px; max-height:120px;" alt="Shipment Image">
                                         </div>
-                                    <?php
+                                        <?php
                                     endif;
                                 endforeach;
                             endif;

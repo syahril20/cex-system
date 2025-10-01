@@ -4,7 +4,8 @@
             <h1 class="mt-4 mb-4">Data Order</h1>
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
+                <div
+                    class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
                     <div class="mb-2 mb-sm-0">
                         <i class="fas fa-truck me-1"></i>
                         Data Order Table
@@ -52,9 +53,12 @@
                                                 <?php
                                                 $status = strtolower($o['status']);
                                                 $badgeClass = 'bg-secondary';
-                                                if ($status === 'success' || $status === 'completed') $badgeClass = 'bg-success';
-                                                elseif ($status === 'pending') $badgeClass = 'bg-warning text-dark';
-                                                elseif ($status === 'failed' || $status === 'cancelled') $badgeClass = 'bg-danger';
+                                                if ($status === 'success' || $status === 'completed')
+                                                    $badgeClass = 'bg-success';
+                                                elseif ($status === 'pending')
+                                                    $badgeClass = 'bg-warning text-dark';
+                                                elseif ($status === 'failed' || $status === 'cancelled')
+                                                    $badgeClass = 'bg-danger';
                                                 ?>
                                                 <span class="badge <?= $badgeClass ?>">
                                                     <?= htmlspecialchars($o['status']) ?>
@@ -63,16 +67,16 @@
                                             <td class="text-center">
                                                 <div class="d-flex flex-wrap justify-content-center gap-1">
                                                     <a href="<?= site_url('order/edit/' . $o['id']) ?>"
-                                                       class="btn btn-sm btn-primary">
+                                                        class="btn btn-sm btn-primary">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
                                                     <a href="<?= site_url('order/detail/' . $o['id']) ?>"
-                                                       class="btn btn-sm btn-info">
+                                                        class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i> Detail
                                                     </a>
                                                     <?php if (!$o['shipment_image']): ?>
                                                         <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
-                                                           class="btn btn-sm btn-warning">
+                                                            class="btn btn-sm btn-warning">
                                                             <i class="fas fa-upload"></i> Upload
                                                         </a>
                                                     <?php endif; ?>
@@ -84,9 +88,7 @@
                             </table>
                         </div>
                     <?php else: ?>
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i> Belum ada order yang tercatat.
-                        </div>
+                        <?php $this->load->view('components/empty_table', ['message' => 'Belum ada order yang tercatat.']); ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -96,6 +98,7 @@
     <?php $this->load->view('layout/footer'); ?>
 
     <!-- DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 </div>
