@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+// use GuzzleHttp\Client;
 class Order extends CI_Controller
 {
     public function __construct()
@@ -9,6 +9,8 @@ class Order extends CI_Controller
         $this->load->library('session');
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
+        $this->load->model('Master_model');
+
         // $this->load->database(); // Uncomment if not autoloaded
     }
 
@@ -50,6 +52,9 @@ class Order extends CI_Controller
 
         $data['session'] = $session;
         $data['page'] = 'OrderForm';
+        $data['rates'] = $this->Master_model->get_rates();
+        $data['commodities'] = $this->Master_model->get_commodity();
+
         if ($user->code == 'SUPER_ADMIN') {
             $this->load->view('superadmin/superadmin_dashboard');
         }
@@ -69,9 +74,10 @@ class Order extends CI_Controller
         $this->form_validation->set_rules('rec_name', 'Receiver Name', 'required');
 
         if ($this->form_validation->run() === FALSE) {
-            echo json_encode([
-                'status' => 400,
-                'msg' => validation_errors()
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Shipper Name dan Receiver Name harus diisi.',
+                'icon' => 'error'
             ]);
             return;
         }
@@ -141,6 +147,11 @@ class Order extends CI_Controller
             'status' => 'Created'
         ];
         $this->db->insert('orders', $orderData);
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'Order berhasil dibuat. Airwaybill: ' . $result['data']['airwaybill'],
+            'icon' => 'success'
+        ]);
         redirect('/order');
     }
 
@@ -148,9 +159,17 @@ class Order extends CI_Controller
     {
         $session = $this->check_token();
 
-        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        $user = $session['user'];
+        $order = $this->db->get_where('orders', [
+            'id' => $orderId,
+            'user_id' => $user->id
+        ])->row();
         if (!$order) {
-            $this->session->set_flashdata('error', 'Order not found.');
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
             redirect('/order');
             return;
         }
@@ -168,13 +187,20 @@ class Order extends CI_Controller
     {
         $session = $this->check_token();
 
-        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        $user = $session['user'];
+        $order = $this->db->get_where('orders', [
+            'id' => $orderId,
+            'user_id' => $user->id
+        ])->row();
         if (!$order) {
-            $this->session->set_flashdata('error', 'Order not found.');
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
             redirect('/order');
         }
 
-        $data = [];
         $data['session'] = $session;
         $data['order'] = $order;
         $data['page'] = 'UploadForm';
@@ -187,7 +213,11 @@ class Order extends CI_Controller
         $airwaybill = $this->input->post('airwaybill');
 
         if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
-            $this->session->set_flashdata('error', "<script>alert('Gagal memuat file upload.');</script>");
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Gagal memuat file upload.',
+                'icon' => 'error'
+            ]);
             log_message('error', 'File upload gagal: ' . json_encode($_FILES['filename']));
             redirect('order');
             return;
@@ -197,7 +227,12 @@ class Order extends CI_Controller
         $file_name = $_FILES['filename']['name'];
 
         if (!$airwaybill || !$file_name) {
-            $this->session->set_flashdata('error', 'Airwaybill dan file harus diisi.');
+
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Airwaybill dan file harus diisi.',
+                'icon' => 'error'
+            ]);
             redirect('order');
             return;
         }
@@ -233,9 +268,28 @@ class Order extends CI_Controller
             ];
 
             // Simpan ke DB
+            // Cek apakah sudah ada data dengan order_id dan airwaybill yang sama
+            $order_id = $this->input->post('order_id');
+            $existing = $this->db->get_where('shipment_images', [
+                'order_id' => $order_id,
+                'airwaybill' => $airwaybill
+            ])->result();
+
+            // Hapus data lama dan file-nya jika ada
+            foreach ($existing as $row) {
+                // Hapus file jika ada
+                $old_file = FCPATH . ltrim($row->file_path, '/');
+                if (file_exists($old_file)) {
+                    @unlink($old_file);
+                }
+                // Hapus data di DB
+                $this->db->delete('shipment_images', ['id' => $row->id]);
+            }
+
+            // Insert data baru
             $insert = [
                 'id' => $this->generate_uuid(),
-                "order_id" => $this->input->post('order_id'),
+                "order_id" => $order_id,
                 "airwaybill" => $airwaybill,
                 "file_name" => $new_file_name,
                 "file_path" => '/uploads/' . $new_file_name,
@@ -245,7 +299,11 @@ class Order extends CI_Controller
 
             $this->db->insert('shipment_images', $insert);
 
-            $this->session->set_flashdata('success', 'Upload berhasil (dummy): ' . json_encode($dummyResponse));
+            $this->session->set_flashdata('swal', [
+                'title' => 'Berhasil!',
+                'text' => 'Upload berhasil.',
+                'icon' => 'success'
+            ]);
 
 
             /**
@@ -289,7 +347,11 @@ class Order extends CI_Controller
             $this->session->set_flashdata('success', 'Upload berhasil (real API): ' . json_encode($result));
             */
         } catch (Exception $e) {
-            $this->session->set_flashdata('error', 'Upload gagal: ' . $e->getMessage());
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Error: ' . $e->getMessage(),
+                'icon' => 'error'
+            ]);
         }
 
         redirect('order');
@@ -302,13 +364,22 @@ class Order extends CI_Controller
 
         if ($token == '' || $token == null) {
             redirect('login');
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Session tidak ditemukan.',
+                'icon' => 'error'
+            ]);
             return;
         }
 
         $tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
         if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
             $this->session->unset_userdata(['token', 'user']);
-            $this->session->set_flashdata('error', 'Session expired. Please login again.');
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
+                'icon' => 'error'
+            ]);
             redirect('login');
             return;
         }
@@ -329,5 +400,14 @@ class Order extends CI_Controller
             mt_rand(0, 0xFFFF),
             mt_rand(0, 0xFFFF)
         );
+    }
+
+    public function test_guzzle()
+    {
+        $client = new \GuzzleHttp\Client();
+        $res = $client->get('https://jsonplaceholder.typicode.com/posts/1');
+        $body = $res->getBody();
+
+        echo $body;
     }
 }

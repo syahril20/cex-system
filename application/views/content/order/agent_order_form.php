@@ -99,7 +99,16 @@
 
                         <div class="col-md-4">
                             <label class="form-label">Service Type</label>
-                            <input type="number" name="service_type" value="3" class="form-control">
+                            <select name="service_type" class="form-select" required>
+                                <option value="">-- Pilih Service Type --</option>
+                                <?php if (!empty($rates) && is_array($rates)): ?>
+                                    <?php foreach ($rates as $rate): ?>
+                                        <option value="<?= htmlspecialchars($rate['id']) ?>">
+                                            <?= htmlspecialchars($rate['text']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
                         </div>
 
                         <div class="col-md-4">
@@ -141,8 +150,16 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Category</label>
-                                        <input type="text" name="shipment_details[0][category]" value="Garment"
-                                            class="form-control">
+                                        <select name="shipment_details[0][category]" class="form-select">
+                                            <option value="">-- Pilih Kategori --</option>
+                                            <?php if (!empty($commodities) && is_array($commodities)): ?>
+                                                <?php foreach ($commodities as $commodity): ?>
+                                                    <option value="<?= htmlspecialchars($commodity['text']) ?>">
+                                                        <?= htmlspecialchars($commodity['text']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Qty</label>
@@ -175,7 +192,16 @@
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Category</label>
-                                            <input type="text" name="shipment_details[${shipmentIndex}][category]" class="form-control">
+                                            <select name="shipment_details[${shipmentIndex}][category]" class="form-select">
+                                                <option value="">-- Pilih Kategori --</option>
+                                                <?php if (!empty($commodities) && is_array($commodities)): ?>
+                                                    <?php foreach ($commodities as $commodity): ?>
+                                                        <option value="<?= htmlspecialchars($commodity['text']) ?>">
+                                                            <?= htmlspecialchars($commodity['text']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Qty</label>

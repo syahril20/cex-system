@@ -43,6 +43,11 @@ class Welcome extends CI_Controller
 		$token = isset($session['token']) ? $session['token'] : null;
 
 		if ($token == '' || $token == null) {
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
+				'icon' => 'error'
+			]);
 			redirect('login');
 			return;
 		}
@@ -50,7 +55,11 @@ class Welcome extends CI_Controller
 		$tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
 		if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
 			$this->session->unset_userdata(['token', 'user']);
-			$this->session->set_flashdata('error', 'Session expired. Please login again.');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
+				'icon' => 'error'
+			]);
 			redirect('login');
 			return;
 		}

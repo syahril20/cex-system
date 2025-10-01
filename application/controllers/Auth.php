@@ -63,7 +63,11 @@ class Auth extends CI_Controller
 		$user = $this->User_model->get_by_email($email);
 
 		if (!$user || !password_verify($password, $user->password)) {
-			$this->session->set_flashdata('error', 'Invalid credentials');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Login gagal.',
+				'icon' => 'error'
+			]);
 			redirect('login');
 		}
 
@@ -87,6 +91,11 @@ class Auth extends CI_Controller
 		$this->session->set_userdata('token', $token);
 		$this->session->set_userdata('user', $user);
 
+		$this->session->set_flashdata('swal', [
+			'title' => 'Berhasil!',
+			'text' => 'Login berhasil.',
+			'icon' => 'success'
+		]);
 		redirect('/');  // atau halaman utama
 	}
 
@@ -106,12 +115,20 @@ class Auth extends CI_Controller
 
 		// Validasi unik
 		if (!$this->User_model->is_unique_username($username)) {
-			$this->session->set_flashdata('error', 'Username sudah dipakai');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Username sudah dipakai.',
+				'icon' => 'error'
+			]);
 			redirect('auth/register');
 		}
 
 		if (!$this->User_model->is_unique_email($email)) {
-			$this->session->set_flashdata('error', 'Email sudah dipakai');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Email sudah dipakai.',
+				'icon' => 'error'
+			]);
 			redirect('auth/register');
 		}
 
@@ -126,10 +143,18 @@ class Auth extends CI_Controller
 		];
 
 		if ($this->User_model->insert_user($data)) {
-			$this->session->set_flashdata('success', 'Register berhasil, silakan login.');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Berhasil!',
+				'text' => 'Register berhasil, silakan login.',
+				'icon' => 'success'
+			]);
 			redirect('login');
 		} else {
-			$this->session->set_flashdata('error', 'Register gagal.');
+			$this->session->set_flashdata('swal', [
+				'title' => 'Gagal!',
+				'text' => 'Register gagal.',
+				'icon' => 'error'
+			]);
 			redirect('register');
 		}
 	}
@@ -148,8 +173,12 @@ class Auth extends CI_Controller
 		$this->session->unset_userdata(['token', 'user_id']);
 
 		// Optional: flash message
-		$this->session->set_flashdata('success', 'You have successfully logged out.');
 
+		$this->session->set_flashdata('swal', [
+			'title' => 'Berhasil!',
+			'text' => 'Logout berhasil.',
+			'icon' => 'success'
+		]);
 		// Redirect ke halaman login
 		redirect('login');
 	}

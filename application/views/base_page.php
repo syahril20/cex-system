@@ -3,9 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<?php echo "<script>console.log('DebugDA: ', " . json_encode($data) . ');</script>';?>
-<?php echo "<script>console.log('Debug: ', " . json_encode($data['page']) . ');</script>';?>
-
 
 <head>
     <meta charset="utf-8" />
@@ -26,5 +23,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
     $this->load->view('layout/sidenav', $data);
     ?>
 </body>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </html>

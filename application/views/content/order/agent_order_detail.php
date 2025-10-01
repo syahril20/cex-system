@@ -104,7 +104,7 @@
                                     }
                                     if (!$hasImage) {
                                         ?>No images available or failed to load.<br>
-                                        <a href="<?= base_url('order/upload_shipment_form/' . $order['id']) ?>"
+                                        <a href="<?= site_url('order/upload_form/' . $order['id']) ?>"
                                             class="btn btn-sm btn-primary">Upload Ulang</a>
                                         <?php
                                     }

@@ -12,7 +12,7 @@
 	},
 	"require": {
 		"php": ">=5.3.7",
-		"guzzlehttp/guzzle": "7.0",
+		"guzzlehttp/guzzle": "^7.8",
 		"vlucas/phpdotenv": "*",
 		"firebase/php-jwt": "*"
 	},

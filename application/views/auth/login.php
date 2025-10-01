@@ -52,7 +52,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                     </form>
                                 </div>
                                 <div class="card-footer text-center py-3">
-                                    <div class="small"><a href="<?= site_url('register') ?>">Need an account? Sign up!</a></div>
+                                    <div class="small"><a href="<?= site_url('register') ?>">Need an account? Sign
+                                            up!</a></div>
                                 </div>
                             </div>
                         </div>
@@ -60,32 +61,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 </div>
             </main>
         </div>
-        
-        <?php $this->load->view('layout/footer')?>
 
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-            <?php if ($this->session->flashdata('error')): ?>
-                <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-                    aria-atomic="true" data-bs-delay="5000">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <?= $this->session->flashdata('error'); ?>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Close"></button>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-                toastElList.forEach(function(toastEl) {
-                    new bootstrap.Toast(toastEl).show();
+        <?php $this->load->view('layout/footer') ?>
+        <!-- 
+        <?php if ($this->session->flashdata('swal')): ?>
+            <script>
+                Swal.fire({
+                    title: '<?= $this->session->flashdata("swal")["title"] ?>',
+                    text: '<?= $this->session->flashdata("swal")["text"] ?>',
+                    icon: '<?= $this->session->flashdata("swal")["icon"] ?>'
                 });
-            });
-        </script>
+            </script>
+        <?php endif; ?> -->
 
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
