@@ -2,26 +2,35 @@
     <main>
         <div class="container-fluid px-4">
 
-            <h1 class="mt-4">Edit User</h1>
-            <div class="card mb-4">
+            <h1 class="mt-4 mb-4">Edit User</h1>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-edit me-2"></i> Form Edit User
+                </div>
                 <div class="card-body">
                     <?php
                     echo "<script>console.log('SYWSAW: ', " . json_encode($roles) . ');</script>';
                     ?>
                     <form action="<?= base_url('user/do_edit/' . $users->id) ?>" method="post">
 
+                        <!-- Username -->
                         <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
+                            <label for="username" class="form-label fw-bold">Username</label>
                             <input type="text" class="form-control" id="username" name="username"
                                 value="<?= htmlspecialchars($users->username) ?>" required>
                         </div>
+
+                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label fw-bold">Email</label>
                             <input type="email" class="form-control" id="email" name="email"
                                 value="<?= htmlspecialchars($users->email) ?>" required>
                         </div>
+
+                        <!-- Role -->
                         <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
+                            <label for="role" class="form-label fw-bold">Role</label>
                             <select class="form-select" id="role" name="role_id" required>
                                 <?php foreach ($roles as $role): ?>
                                     <option value="<?= htmlspecialchars($role->id) ?>" <?= $role->id == $users->role_id ? 'selected' : '' ?>>
@@ -29,56 +38,65 @@
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-
                         </div>
+
+                        <!-- Password -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password (leave blank if unchanged)</label>
+                            <label for="password" class="form-label fw-bold">Password 
+                                <small class="text-muted">(leave blank if unchanged)</small>
+                            </label>
                             <input type="password" class="form-control" id="password" name="password"
                                 autocomplete="new-password">
                         </div>
-                        <button type="submit" class="btn btn-primary">Update User</button>
-                        <a href="<?= base_url('user') ?>" class="btn btn-secondary">Cancel</a>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success flex-fill" id="btn-update-user">
+                                <i class="fas fa-save me-1"></i> Update User
+                            </button>
+                            <a href="<?= base_url('user') ?>" class="btn btn-secondary flex-fill">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                        </div>
                     </form>
                 </div>
-
             </div>
+
+        </div>
     </main>
 
     <?php $this->load->view('layout/footer'); ?>
 
+    <!-- DataTables -->
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
         crossorigin="anonymous"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 
-    <!-- SweetAlert2 harus di-include -->
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // pakai body delegation
-            document.body.addEventListener('click', function (e) {
-                const btn = e.target.closest('.btn-delete');
-                if (!btn) return;
-
-                e.preventDefault(); // hentikan redirect
-
-                const url = btn.getAttribute('href');
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = url;
-                    }
+            const form = document.querySelector('form[action*="do_edit"]');
+            const btn = document.getElementById('btn-update-user');
+            if (form && btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Update this user data?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, update it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
-            });
+            }
         });
     </script>
-
 </div>

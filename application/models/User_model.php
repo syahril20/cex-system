@@ -75,4 +75,25 @@ class User_model extends CI_Model
         $this->db->where('id', $id);
         $this->db->update('users', $data);
     }
+
+    public function get_all_except_role($currentUserId, $excludedRoleCode)
+    {
+        $this->db->select('users.id, users.username, users.email, roles.name as role, roles.code, 
+        users.created_at, users.created_by, users.updated_at, users.updated_by, users.disabled_at');
+        $this->db->from('users');
+        $this->db->join('roles', 'roles.id = users.role_id', 'left');
+        $this->db->where('users.id !=', $currentUserId);
+        $this->db->where('roles.code !=', $excludedRoleCode);
+        return $this->db->get()->result_array();
+    }
+
+    public function get_all_by_role($roleCode)
+    {
+        $this->db->select('users.id, users.username, users.email, roles.name as role, roles.code, 
+        users.created_at, users.created_by, users.updated_at, users.updated_by, users.disabled_at');
+        $this->db->from('users');
+        $this->db->join('roles', 'roles.id = users.role_id', 'left');
+        $this->db->where('roles.code', $roleCode);
+        return $this->db->get()->result_array();
+    }
 }

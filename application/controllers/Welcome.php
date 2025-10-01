@@ -34,12 +34,15 @@ class Welcome extends CI_Controller
 			? (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users')
 			: 0;
 		$data['total_orders'] = (int) $this->db->count_all('orders') ?: 0;
-		// Contoh data dummy aktivitas terbaru
-		// Ambil 10 aktivitas terbaru dari tabel 'activity'
-		$data['recent_activities'] = $this->db
-			->order_by('created_at', 'DESC')
-			->get('activity')
-			->result_array();
+		$this->db->select('activity.*, users.username');
+		$this->db->from('activity');
+		$this->db->join('users', 'users.id = activity.user_id', 'left');
+		$this->db->where('activity.created_at >=', date('Y-m-d H:i:s', strtotime('-6 hours')));
+		$this->db->order_by('activity.created_at', 'DESC');
+		$activities = $this->db->get()->result_array();
+
+		
+		$data['recent_activities'] = $activities;
 		if ($user->code == 'SUPER_ADMIN') {
 			$this->load->view('base_page', ['data' => $data]);
 		}

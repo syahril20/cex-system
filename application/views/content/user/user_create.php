@@ -2,74 +2,90 @@
     <main>
         <div class="container-fluid px-4">
 
-            <h1 class="mt-4">Tambah User</h1>
-            <div class="card mb-4">
+            <!-- Judul -->
+            <h1 class="mt-4 mb-4">
+                <i class="fas fa-user-plus me-2 text-success"></i>
+                Tambah User
+            </h1>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-success text-white">
+                    <div><i class="fas fa-user-plus me-2"></i> Form Tambah User</div>
+                </div>
                 <div class="card-body">
                     <form action="<?= base_url('user/do_create') ?>" method="post">
+
+                        <!-- Username -->
                         <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <label for="username" class="form-label fw-bold">Username</label>
+                            <input type="text" class="form-control shadow-sm" id="username" name="username" required>
                         </div>
+
+                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email" class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control shadow-sm" id="email" name="email" required>
                         </div>
+
+                        <!-- Password -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <label for="password" class="form-label fw-bold">Password</label>
+                            <input type="password" class="form-control shadow-sm" id="password" name="password" required>
                         </div>
+
+                        <!-- Role -->
                         <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <select class="form-select" id="role" name="role_id" required>
+                            <label for="role" class="form-label fw-bold">Role</label>
+                            <select class="form-select shadow-sm" id="role" name="role_id" required>
                                 <option value="">Pilih Role</option>
                                 <?php foreach ($roles as $role): ?>
                                     <option value="<?= $role->id ?>"><?= htmlspecialchars($role->name) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="<?= base_url('user') ?>" class="btn btn-secondary">Batal</a>
+
+                        <!-- Buttons -->
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-success flex-fill">
+                                <i class="fas fa-save me-1"></i> Simpan
+                            </button>
+                            <a href="<?= base_url('user') ?>" class="btn btn-secondary flex-fill">
+                                <i class="fas fa-times me-1"></i> Batal
+                            </a>
+                        </div>
                     </form>
                 </div>
-
             </div>
+
+        </div>
     </main>
 
     <?php $this->load->view('layout/footer'); ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
-        crossorigin="anonymous"></script>
-    <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
-
-    <!-- SweetAlert2 harus di-include -->
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // pakai body delegation
-            document.body.addEventListener('click', function (e) {
-                const btn = e.target.closest('.btn-delete');
-                if (!btn) return;
-
-                e.preventDefault(); // hentikan redirect
-
-                const url = btn.getAttribute('href');
-
+            const form = document.querySelector('form[action*="do_create"]');
+            const btn = form.querySelector('button[type="submit"]');
+            
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
+                    title: 'Yakin simpan user baru?',
+                    text: "Pastikan data sudah benar.",
+                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, simpan!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = url;
+                        form.submit();
                     }
                 });
             });
         });
     </script>
-
 </div>

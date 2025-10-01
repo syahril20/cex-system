@@ -15,7 +15,17 @@ class User extends CI_Controller
     public function index()
     {
         $session = check_token();
-        $users = $this->User_model->get_all_users_except($session['user']->id);
+        $user = $session['user'];
+        // Ambil user yang bisa dilihat sesuai role
+        if ($user->code == 'SUPER_ADMIN') {
+            // SUPER_ADMIN tidak bisa melihat user dengan role yang sama (SUPER_ADMIN lain)
+            $users = $this->User_model->get_all_except_role($user->id, 'SUPER_ADMIN');
+        } elseif ($user->code == 'ADMIN') {
+            // ADMIN hanya bisa melihat user dengan role AGENT
+            $users = $this->User_model->get_all_by_role('AGENT');
+        } else {
+            $users = [];
+        }
         $user = $session['user'];
 
         $data['session'] = $session;
@@ -26,7 +36,8 @@ class User extends CI_Controller
             $this->load->view('base_page', ['data' => $data]);
         } else {
             redirect('/');
-        }    }
+        }
+    }
 
     public function create()
     {
@@ -70,7 +81,7 @@ class User extends CI_Controller
             'email' => $this->input->post('email'),
             'role_id' => $role_id,
             'password' => password_hash($this->input->post('password'), PASSWORD_BCRYPT),
-            'created_at' => date('Y-m-d H:i:s'),
+            'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'created_by' => $session['user']->username
         ];
 
@@ -106,7 +117,8 @@ class User extends CI_Controller
             $this->load->view('base_page', ['data' => $data]);
         } else {
             redirect('/');
-        }    }
+        }
+    }
 
     public function do_edit($id)
     {
@@ -141,12 +153,12 @@ class User extends CI_Controller
             'email' => $this->input->post('email'),
             'role_id' => $role_id,
             'password' => $this->input->post('password') ? password_hash($this->input->post('password'), PASSWORD_BCRYPT) : $user->password,
-            'updated_at' => date('Y-m-d H:i:s'),
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'updated_by' => $session['user']->username
         ];
 
 
-        log_activity($this, 'edit_user', 'Mengedit user dengan ID: ' . $id);
+        log_activity($this, 'edit_user', 'Mengedit user dengan Username: ' . $data['username']);
 
         $this->User_model->update($id, $data);
         redirect('user');
@@ -165,6 +177,9 @@ class User extends CI_Controller
             'icon' => 'success'
         ]);
 
+        $user = $this->User_model->get_by_id($id);
+        log_activity($this, 'delete_user', 'Menghapus user dengan Username: ' . ($user ? $user->username : $id));
+
         redirect('user');
     }
 
@@ -174,7 +189,7 @@ class User extends CI_Controller
 
         $data = [
             'disabled_at' => null,
-            'updated_at' => date('Y-m-d H:i:s'),
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'updated_by' => $session['user']->username
         ];
 
@@ -186,6 +201,9 @@ class User extends CI_Controller
             'text' => 'User berhasil diaktifkan kembali.',
             'icon' => 'success'
         ]);
+
+        $user = $this->User_model->get_by_id($id);
+        log_activity($this, 'activate_user', 'Mengaktifkan user dengan Username: ' . ($user ? $user->username : $id));
 
         redirect('user');
     }

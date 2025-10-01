@@ -51,15 +51,8 @@ class Order extends CI_Controller
         $data['session'] = $session;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
-        if ($user->code == 'SUPER_ADMIN') {
-            $this->load->view('superadmin/superadmin_dashboard');
-        }
-        if ($user->code == 'ADMIN') {
-            $this->load->view('admin/admin_dashboard');
-        }
-        if ($user->code == 'AGENT') {
-            $this->load->view('base_page', ['data' => $data]);
-        }
+
+        $this->load->view('base_page', ['data' => $data]);
     }
 
     public function order_form()
@@ -149,7 +142,7 @@ class Order extends CI_Controller
             "msg" => "Shipment created.",
             "data" => [
                 "code" => 395,
-                "airwaybill" => "AIN102500001",
+                "airwaybill" => 'AIN' . mt_rand(100000000, 999999999),
                 "printUrl" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_thermal_frame/1N38",
                 "printUrlA4" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_frame/1N38"
             ]
@@ -184,10 +177,16 @@ class Order extends CI_Controller
         $session = check_token();
 
         $user = $session['user'];
-        $order = $this->db->get_where('orders', [
-            'id' => $orderId,
-            'user_id' => $user->id
-        ])->row();
+        if ($user->code == 'AGENT') {
+            $order = $this->db->get_where('orders', [
+                'id' => $orderId,
+                'user_id' => $user->id
+            ])->row();
+        } else {
+            $order = $this->db->get_where('orders', [
+                'id' => $orderId
+            ])->row();
+        }
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -203,8 +202,6 @@ class Order extends CI_Controller
         $data['session'] = $session;
         $data['order'] = $order;
         $data['page'] = 'OrderDetail';
-
-        log_activity($this, 'view_order_detail', 'Melihat detail order dengan ID: ' . $orderId);
 
         $this->load->view('base_page', ['data' => $data]);
     }
@@ -289,7 +286,6 @@ class Order extends CI_Controller
                     "file_name" => $new_file_name,
                     "file_path" => base_url('uploads/' . $new_file_name),
                     "file_type" => mime_content_type($destination),
-                    "uploaded_by" => "system"
                 ]
             ];
 
@@ -320,7 +316,6 @@ class Order extends CI_Controller
                 "file_name" => $new_file_name,
                 "file_path" => '/uploads/' . $new_file_name,
                 "file_type" => mime_content_type($destination),
-                "uploaded_by" => "system",
                 'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             ];
 
@@ -423,5 +418,140 @@ class Order extends CI_Controller
         $body = $res->getBody();
 
         echo $body;
+    }
+
+    public function edit($orderId)
+    {
+        $session = check_token();
+        $user = $session['user'];
+
+        // Hanya ADMIN dan SUPER_ADMIN yang boleh edit
+        if (!in_array($user->code, ['ADMIN', 'SUPER_ADMIN'])) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Anda tidak memiliki akses untuk mengedit order.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        if (!$order) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        // Ambil data payload lama untuk form
+        $order_data = json_decode($order->data, true);
+
+        $data['session'] = $session;
+        $data['order'] = $order;
+        $data['order_data'] = $order_data;
+        $data['page'] = 'OrderEdit';
+        $data['rates'] = $this->Master_model->get_rates();
+        $data['commodities'] = $this->Master_model->get_commodity();
+
+        $this->load->view('base_page', ['data' => $data]);
+    }
+
+    public function do_edit($orderId)
+    {
+        $session = check_token();
+        $user = $session['user'];
+
+        // Hanya ADMIN dan SUPER_ADMIN yang boleh edit
+        if (!in_array($user->code, ['ADMIN', 'SUPER_ADMIN'])) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Anda tidak memiliki akses untuk mengedit order.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        if (!$order) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        if ($this->input->method() === 'post') {
+            $data = $this->input->post('data'); // Ambil data JSON
+            $shipmentDetails = $data['shipment_details'] ?? [];
+
+            // Validasi wajib
+            if (empty($data['ship_name']) || empty($data['rec_name'])) {
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Gagal!',
+                    'text' => 'Shipper Name dan Receiver Name harus diisi.',
+                    'icon' => 'error'
+                ]);
+                redirect('/order/edit/' . $orderId);
+                return;
+            }
+
+            // Validasi shipment_details
+            foreach ($shipmentDetails as $i => $item) {
+                if (
+                    !isset($item['name'], $item['category'], $item['qty'], $item['price']) ||
+                    $item['qty'] <= 0 || $item['price'] < 0
+                ) {
+                    $this->session->set_flashdata('swal', [
+                        'title' => 'Gagal!',
+                        'text' => 'Shipment Details baris ke-' . ($i + 1) . ' tidak valid.',
+                        'icon' => 'error'
+                    ]);
+                    redirect('/order/edit/' . $orderId);
+                    return;
+                }
+            }
+
+            // Update data order
+            $payload = array_merge($data, ['shipment_details' => $shipmentDetails]);
+
+            $updateData = [
+                'data' => json_encode($payload),
+                'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+                'updated_by' => $user->username
+            ];
+
+            $this->db->where('id', $orderId);
+            $this->db->update('orders', $updateData);
+
+            $this->session->set_flashdata('swal', [
+                'title' => 'Berhasil!',
+                'text' => 'Order berhasil diupdate.',
+                'icon' => 'success'
+            ]);
+
+            log_activity($this, 'edit_order', 'Edit order dengan airwaybill: ' . $order->airwaybill);
+
+            redirect('/order/detail/' . $orderId);
+            return;
+        }
+
+        // Ambil data payload lama untuk form
+        $order_data = json_decode($order->data, true);
+
+        $data['session'] = $session;
+        $data['order'] = $order;
+        $data['order_data'] = $order_data;
+        $data['page'] = 'OrderEdit';
+        $data['rates'] = $this->Master_model->get_rates();
+        $data['commodities'] = $this->Master_model->get_commodity();
+
+        $this->load->view('base_page', ['data' => $data]);
     }
 }
