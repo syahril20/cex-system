@@ -18,13 +18,14 @@
                     $code = $user->code;
                     ?>
 
+                    <!-- Super Admin -->
                     <?php if ($code === "SUPER_ADMIN"): ?>
                         <div class="sb-sidenav-menu-heading">Control</div>
                         <a class="nav-link" href="<?= site_url('/user') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
                             User
                         </a>
-                        <a class="nav-link" href="<?= site_url('/role') ?>">
+                        <a class="nav-link" href="<?= site_url('/roles') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-flag"></i></div>
                             Roles
                         </a>
@@ -34,6 +35,24 @@
                         </a>
                     <?php endif; ?>
 
+                    <!-- Admin -->
+                    <?php if ($code === 'ADMIN'): ?>
+                        <div class="sb-sidenav-menu-heading">Control</div>
+                        <a class="nav-link" href="<?= site_url('/user') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
+                            User
+                        </a>
+                        <a class="nav-link" href="<?= site_url('/roles') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-flag"></i></div>
+                            Roles
+                        </a>
+                        <a class="nav-link" href="<?= site_url('/order') ?>">
+                            <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                            Order
+                        </a>
+                    <?php endif; ?>
+
+                    <!-- Agent -->
                     <?php
                     if ($code === 'AGENT'): ?>
                         <a class="nav-link" href="<?= site_url('/order') ?>">
@@ -58,12 +77,12 @@
     <?php
     if (isset($page) && ($page != null || $page == '')) {
         if ($page == 'Dashboard') {
+            if ($this->session->userdata('user')->code === 'SUPER_ADMIN') {
+                $this->load->view('content/dashboard/superadmin_dashboard');
+            }
             if ($code === 'AGENT') {
                 $this->load->view('content/dashboard/agent_dashboard');
             }
-            // if ($this->session->userdata('user')->code === 'SUPER_ADMIN') {
-            //     $this->load->view('content/superadmin_dashboard');
-            // }
             // if ($this->session->userdata('user')->code === 'ADMIN') {
             //     $this->load->view('content/admin_dashboard');
             // }

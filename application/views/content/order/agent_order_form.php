@@ -146,11 +146,11 @@
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Name</label>
                                         <input type="text" name="shipment_details[0][name]" value="Jacket"
-                                            class="form-control">
+                                            class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Category</label>
-                                        <select name="shipment_details[0][category]" class="form-select">
+                                        <select name="shipment_details[0][category]" class="form-select" required>
                                             <option value="">-- Pilih Kategori --</option>
                                             <?php if (!empty($commodities) && is_array($commodities)): ?>
                                                 <?php foreach ($commodities as $commodity): ?>
@@ -164,20 +164,20 @@
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Qty</label>
                                         <input type="number" name="shipment_details[0][qty]" value="1"
-                                            class="form-control">
+                                            class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label">Shipment Item Price</label>
                                         <input type="number" name="shipment_details[0][price]" value="20"
-                                            class="form-control">
+                                            class="form-control" required>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 mb-3">
                             <button type="button" class="btn btn-success" id="add-shipment-item">Tambah Item</button>
+                            <button type="button" class="btn btn-danger" id="remove-shipment-item">Hapus Item</button>
                         </div>
-
                         <script>
                             let shipmentIndex = 1;
                             document.getElementById('add-shipment-item').addEventListener('click', function () {
@@ -188,11 +188,11 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Name</label>
-                                            <input type="text" name="shipment_details[${shipmentIndex}][name]" class="form-control">
+                                            <input type="text" name="shipment_details[${shipmentIndex}][name]" class="form-control" required>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Category</label>
-                                            <select name="shipment_details[${shipmentIndex}][category]" class="form-select">
+                                            <select name="shipment_details[${shipmentIndex}][category]" class="form-select" required>
                                                 <option value="">-- Pilih Kategori --</option>
                                                 <?php if (!empty($commodities) && is_array($commodities)): ?>
                                                     <?php foreach ($commodities as $commodity): ?>
@@ -205,22 +205,32 @@
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Qty</label>
-                                            <input type="number" name="shipment_details[${shipmentIndex}][qty]" value="1" class="form-control">
+                                            <input type="number" name="shipment_details[${shipmentIndex}][qty]" value="1" class="form-control" required>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Shipment Item Price</label>
-                                            <input type="number" name="shipment_details[${shipmentIndex}][price]" value="0" class="form-control">
+                                            <input type="number" name="shipment_details[${shipmentIndex}][price]" value="0" class="form-control" required>
                                         </div>
                                     </div>
                                 `;
                                 container.appendChild(group);
                                 shipmentIndex++;
                             });
+
+                            document.getElementById('remove-shipment-item').addEventListener('click', function () {
+                                const container = document.getElementById('shipment-details-container');
+                                // Only remove if more than one group exists
+                                const groups = container.getElementsByClassName('shipment-detail-group');
+                                if (groups.length > 1) {
+                                    container.removeChild(groups[groups.length - 1]);
+                                    shipmentIndex--;
+                                }
+                            });
                         </script>
                         <div class="col-12"></div>
                         <button type="submit" class="btn btn-primary">Submit Order</button>
+                    </form>
                 </div>
-                </form>
             </div>
         </div>
     </main>

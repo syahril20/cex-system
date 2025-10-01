@@ -23,11 +23,26 @@ class Welcome extends CI_Controller
 	{
 		$session = $this->check_token();
 
+		$admin_role = $this->db->get_where('roles', ['code' => 'ADMIN'])->row();
+		$admin_role_id = $admin_role ? $admin_role->id : 0;
+
 		$user = $session['user'];
 		$data['session'] = $session;
 		$data['page'] = 'Dashboard';
+		$data['total_users'] = (int) $this->db->count_all('users') ?: 0;
+		$data['total_admin'] = $admin_role_id
+			? (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users')
+			: 0;
+		$data['total_orders'] = (int) $this->db->count_all('orders') ?: 0;
+		// Contoh data dummy aktivitas terbaru
+		// Ambil 10 aktivitas terbaru dari tabel 'activity'
+		$data['recent_activities'] = $this->db
+			->order_by('created_at', 'DESC')
+			->limit(10)
+			->get('activity')
+			->result_array();
 		if ($user->code == 'SUPER_ADMIN') {
-			$this->load->view('superadmin/superadmin_dashboard');
+			$this->load->view('base_page', ['data' => $data]);
 		}
 		if ($user->code == 'ADMIN') {
 			$this->load->view('admin/admin_dashboard');

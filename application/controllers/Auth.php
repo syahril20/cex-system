@@ -26,6 +26,7 @@ class Auth extends CI_Controller
 		$this->load->library('session');
 		$this->load->library('JwtAuth');
 		$this->load->helper('security');
+		$this->load->helper('activity');
 	}
 
 	/**
@@ -79,12 +80,14 @@ class Auth extends CI_Controller
 		$this->db->delete('user_tokens', ['user_id' => $user->id]);
 
 		// Simpan ke DB
-		$expired_at = date('Y-m-d H:i:s', strtotime('+7 days'));
+		$created_at = gmdate('Y-m-d H:i:s', time() + 7 * 3600);
+		$expired_at = date('Y-m-d H:i:s', strtotime($created_at . ' +7 days'));
 		$this->db->insert('user_tokens', [
 			'id' => $this->generate_uuid(),
 			'user_id' => $user->id,
 			'token' => $token,
-			'expired_at' => $expired_at
+			'expired_at' => $expired_at,
+			'created_at' => $created_at,
 		]);
 
 		// Simpan token di session
@@ -96,6 +99,9 @@ class Auth extends CI_Controller
 			'text' => 'Login berhasil.',
 			'icon' => 'success'
 		]);
+
+		log_activity($this, 'login', 'User ' . $user->email . ' berhasil login.');
+
 		redirect('/');  // atau halaman utama
 	}
 
@@ -139,7 +145,9 @@ class Auth extends CI_Controller
 			'email' => $email,
 			'password' => password_hash($password, PASSWORD_BCRYPT),
 			'role_id' => $role_id,
-			'created_by' => 'system'
+			'created_by' => 'system',
+			'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+			'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600)
 		];
 
 		if ($this->User_model->insert_user($data)) {

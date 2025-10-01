@@ -9,6 +9,7 @@ class Order extends CI_Controller
         $this->load->library('session');
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
+        $this->load->helper('activity');
         $this->load->model('Master_model');
 
         // $this->load->database(); // Uncomment if not autoloaded
@@ -20,17 +21,33 @@ class Order extends CI_Controller
         $user = $session['user'];
         $userId = $user->id;
 
-        $query = $this->db->get_where('orders', ['user_id' => $userId]);
-        $orders = $query->num_rows() > 0 ? $query->result_array() : null;
+        $orders = null;
+        if ($user->code == 'AGENT') {
+            $this->db->order_by('created_at', 'DESC');
+            $query = $this->db->get_where('orders', ['user_id' => $userId]);
+            $orders = $query->num_rows() > 0 ? $query->result_array() : null;
 
-        if ($orders) {
-            foreach ($orders as &$o) {
-                $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
-                $o['shipment_image'] = $shipment_image;
+            if ($orders) {
+                foreach ($orders as &$o) {
+                    $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
+                    $o['shipment_image'] = $shipment_image;
+                }
+                unset($o);
             }
-            unset($o);
         }
+        if ($user->code == 'ADMIN' || $user->code == 'SUPER_ADMIN') {
+            $this->db->order_by('created_at', 'DESC');
+            $query = $this->db->get('orders');
+            $orders = $query->num_rows() > 0 ? $query->result_array() : null;
 
+            if ($orders) {
+                foreach ($orders as &$o) {
+                    $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
+                    $o['shipment_image'] = $shipment_image;
+                }
+                unset($o);
+            }
+        }
         $data['session'] = $session;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
@@ -131,20 +148,24 @@ class Order extends CI_Controller
             "status" => 200,
             "msg" => "Shipment created.",
             "data" => [
-                "airwaybill" => strval(mt_rand(100000000000, 999999999999))
+                "code" => 395,
+                "airwaybill" => "AIN102500001",
+                "printUrl" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_thermal_frame/1N38",
+                "printUrlA4" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_frame/1N38"
             ]
         ];
 
         // Simpan ke table orders
         $orderData = [
-            'id' => $this->generate_uuid(),
+            'id' => generate_uuid(),
             'user_id' => $this->session->userdata('user')->id,
             'data' => json_encode($payload),
             'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'created_by' => $this->session->userdata('user')->username,
             'airwaybill' => $result['data']['airwaybill'],
-            'status' => 'Created'
+            'status' => 'Created',
+            'response' => json_encode($result)
         ];
         $this->db->insert('orders', $orderData);
         $this->session->set_flashdata('swal', [
@@ -152,6 +173,9 @@ class Order extends CI_Controller
             'text' => 'Order berhasil dibuat. Airwaybill: ' . $result['data']['airwaybill'],
             'icon' => 'success'
         ]);
+
+        log_activity($this, 'create_order', 'Membuat order baru dengan airwaybill: ' . $result['data']['airwaybill']);
+
         redirect('/order');
     }
 
@@ -179,6 +203,8 @@ class Order extends CI_Controller
         $data['session'] = $session;
         $data['order'] = $order;
         $data['page'] = 'OrderDetail';
+
+        log_activity($this, 'view_order_detail', 'Melihat detail order dengan ID: ' . $orderId);
 
         $this->load->view('base_page', ['data' => $data]);
     }
@@ -288,13 +314,14 @@ class Order extends CI_Controller
 
             // Insert data baru
             $insert = [
-                'id' => $this->generate_uuid(),
+                'id' => generate_uuid(),
                 "order_id" => $order_id,
                 "airwaybill" => $airwaybill,
                 "file_name" => $new_file_name,
                 "file_path" => '/uploads/' . $new_file_name,
                 "file_type" => mime_content_type($destination),
-                "uploaded_by" => "system"
+                "uploaded_by" => "system",
+                'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             ];
 
             $this->db->insert('shipment_images', $insert);
@@ -354,6 +381,8 @@ class Order extends CI_Controller
             ]);
         }
 
+        log_activity($this, 'upload_shipment_image', 'Upload shipment image untuk airwaybill: ' . $airwaybill);
+
         redirect('order');
     }
 
@@ -385,21 +414,6 @@ class Order extends CI_Controller
         }
 
         return $session;
-    }
-
-    private function generate_uuid()
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFF) | 0x4000,
-            mt_rand(0, 0x3FFF) | 0x8000,
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF),
-            mt_rand(0, 0xFFFF)
-        );
     }
 
     public function test_guzzle()
