@@ -65,8 +65,6 @@ class Master_model extends CI_Model
     {
         $result = $this->get_tracking($airwaybill);
 
-        echo "<script>console.log('Tracking Result:ad " . json_encode($result) . "');</script>";
-
         if (empty($result) || empty($result['trackings'])) {
             return null;
         }

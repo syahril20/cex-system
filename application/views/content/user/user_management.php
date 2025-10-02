@@ -43,7 +43,6 @@
                                 <tbody>
                                     <?php if (!empty($users)): ?>
                                         <?php foreach ($users as $o): ?>
-                                            <?php echo "<script>console.log(" . json_encode($o) . ");</script>"; ?>
                                             <tr>
                                                 <td><strong><?= htmlspecialchars($o['username']) ?></strong></td>
                                                 <td><?= htmlspecialchars($o['email']) ?></td>

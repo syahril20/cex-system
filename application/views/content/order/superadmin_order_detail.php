@@ -57,11 +57,13 @@
                                         <?php
                                         $status = strtolower($order['status']);
                                         $badgeClass = 'bg-secondary';
-                                        if ($status === 'complete') {
+                                        if ($status == 'complete') {
                                             $badgeClass = 'bg-success';
-                                        } elseif ($status === 'created') {
+                                        } elseif ($status == 'created') {
                                             $badgeClass = 'bg-primary';
-                                        } elseif ($status === 'cancelled') {
+                                        } elseif ($status == 'cancelled') {
+                                            $badgeClass = 'bg-danger';
+                                        } elseif ($status == 'rejected') {
                                             $badgeClass = 'bg-danger';
                                         } else {
                                             // Status perjalanan atau sedang berada di lokasi tertentu
@@ -69,7 +71,7 @@
                                         }
                                         ?>
                                         <span class="badge <?= $badgeClass ?> text-wrap text-start"
-                                            style="white-space: normal; word-break: break-word; max-width: 350x; display: inline-block; line-height:1.2;">
+                                            style="white-space: normal; word-break: break-word; max-width: 350px; display: inline-block; line-height:1.2;">
                                             <?= htmlspecialchars($order['status']) ?>
                                         </span>
                                     </td>
@@ -134,7 +136,8 @@
                                                                                 <?php foreach ($detail as $dKey => $dVal): ?>
                                                                                     <tr>
                                                                                         <th style="width:150px;">
-                                                                                            <?= ucwords(str_replace('_', ' ', $dKey)) ?></th>
+                                                                                            <?= ucwords(str_replace('_', ' ', $dKey)) ?>
+                                                                                        </th>
                                                                                         <td><?= htmlspecialchars($dVal) ?></td>
                                                                                     </tr>
                                                                                 <?php endforeach; ?>
@@ -187,10 +190,16 @@
                             else: ?>
                                 <div class="col">
                                     <span class="text-muted">No images available.</span><br>
-                                    <a href="<?= site_url('order/upload_form/' . $order['id']) ?>"
-                                        class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-upload"></i> Upload Ulang
-                                    </a>
+                                    <?php if (strtolower($order['status']) === 'rejected'): ?>
+                                        <button class="btn btn-sm btn-primary mt-2" disabled>
+                                            <i class="fas fa-upload"></i> Upload Ulang
+                                        </button>
+                                    <?php else: ?>
+                                        <a href="<?= site_url('order/upload_form/' . $order['id']) ?>"
+                                            class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-upload"></i> Upload Ulang
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>

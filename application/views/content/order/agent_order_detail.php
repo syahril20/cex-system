@@ -48,11 +48,13 @@
                                     <?php
                                     $status = strtolower($order['status']);
                                     $badgeClass = 'bg-secondary';
-                                    if ($status === 'complete') {
+                                    if ($status == 'complete') {
                                         $badgeClass = 'bg-success';
-                                    } elseif ($status === 'created') {
+                                    } elseif ($status == 'created') {
                                         $badgeClass = 'bg-primary';
-                                    } elseif ($status === 'cancelled') {
+                                    } elseif ($status == 'cancelled') {
+                                        $badgeClass = 'bg-danger';
+                                    } elseif ($status == 'rejected') {
                                         $badgeClass = 'bg-danger';
                                     } else {
                                         // Status perjalanan atau sedang berada di lokasi tertentu
@@ -171,10 +173,16 @@
                             if (!$hasValidImage): ?>
                                 <div class="col">
                                     <span class="text-muted">No images available.</span><br>
-                                    <a href="<?= site_url('order/upload_form/' . $order['id']) ?>"
-                                        class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-upload"></i> Upload Ulang
-                                    </a>
+                                    <?php if (strtolower($order['status']) === 'rejected'): ?>
+                                        <button class="btn btn-sm btn-primary mt-2" disabled>
+                                            <i class="fas fa-upload"></i> Upload Ulang
+                                        </button>
+                                    <?php else: ?>
+                                        <a href="<?= site_url('order/upload_form/' . $order['id']) ?>"
+                                            class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-upload"></i> Upload Ulang
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>

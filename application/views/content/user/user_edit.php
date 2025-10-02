@@ -10,7 +10,6 @@
                 </div>
                 <div class="card-body">
                     <?php
-                    echo "<script>console.log('SYWSAW: ', " . json_encode($roles) . ');</script>';
                     ?>
                     <form action="<?= base_url('user/do_edit/' . $users->id) ?>" method="post">
 

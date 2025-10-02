@@ -42,7 +42,7 @@
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="fw-semibold">Total Transaksi</h6>
-                                <h3 class="fw-bold"><?= isset($total_transaksi) ? $total_transaksi : '0'; ?></h3>
+                                <h3 class="fw-bold"><?= isset($total_orders) ? $total_orders : '0'; ?></h3>
                             </div>
                             <i class="fas fa-exchange-alt stat-icon"></i>
                         </div>
@@ -69,7 +69,7 @@
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="fw-semibold">Transaksi Hari Ini</h6>
-                                <h3 class="fw-bold"><?= isset($transaksi_hari_ini) ? $transaksi_hari_ini : '0'; ?></h3>
+                                <h3 class="fw-bold"><?= isset($today_orders) ? $today_orders : '0'; ?></h3>
                             </div>
                             <i class="fas fa-calendar-day stat-icon"></i>
                         </div>

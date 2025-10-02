@@ -22,29 +22,45 @@ class Welcome extends CI_Controller
 	{
 		$session = $this->check_token();
 
+		// Get admin role ID
 		$admin_role = $this->db->get_where('roles', ['code' => 'ADMIN'])->row();
 		$admin_role_id = $admin_role ? $admin_role->id : 0;
 
 		$user = $session['user'];
-		$data['session'] = $session;
-		$data['page'] = 'Dashboard';
-		$data['total_users'] = (int) $this->db->count_all('users') ?: 0;
-		$data['total_admin'] = $admin_role_id
-			? (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users')
-			: 0;
-		$data['total_orders'] = (int) $this->db->count_all('orders') ?: 0;
 
-		$this->db->select('activity.*, users.username');
-		$this->db->from('activity');
-		$this->db->join('users', 'users.id = activity.user_id', 'left');
-		$this->db->where('activity.created_at >=', date('Y-m-d H:i:s', strtotime('-6 hours')));
-		$this->db->order_by('activity.created_at', 'DESC');
-		$activities = $this->db->get()->result_array();
+		// Prepare dashboard data
+		$data = [
+			'session' => $session,
+			'page' => 'Dashboard',
+		];
 
-		$data['recent_activities'] = $activities;
+		// Get recent activities (last 6 hours) only for SUPER_ADMIN
+		if (isset($user->code) && $user->code === 'SUPER_ADMIN') {
+			$this->db->select('activity.*, users.username');
+			$this->db->from('activity');
+			$this->db->join('users', 'users.id = activity.user_id', 'left');
+			// Compare using GMT+7 (Asia/Jakarta)
+			$dt = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
+			$dt->modify('-6 hours');
+			$this->db->where('activity.created_at >=', $dt->format('Y-m-d H:i:s'));
+			$this->db->order_by('activity.created_at', 'DESC');
+			$data['recent_activities'] = $this->db->get()->result_array();
+
+			$data['total_users'] = (int) $this->db->count_all('users');
+			$data['total_admin'] = (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users');
+			$data['total_orders'] = (int) $this->db->count_all('orders');
+		}
+
+		// Kondisi agent: tampilkan jumlah agent aktif & total agent
+		if (isset($user->code) && $user->code === 'AGENT') {
+			$data['total_orders'] = (int) $this->db->where('created_by', $user->username)->count_all_results('orders');
+			$data['today_orders'] = (int) $this->db
+				->where('created_by', $user->username)
+				->where('DATE(created_at)', date('Y-m-d', time() + 7 * 3600))
+				->count_all_results('orders');
+		}
 
 		$this->load->view('base_page', ['data' => $data]);
-
 	}
 
 	private function check_token()

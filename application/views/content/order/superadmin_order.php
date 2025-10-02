@@ -1,17 +1,49 @@
 <style>
-    /* Ukuran font tabel lebih kecil */
+    /* Font kecil untuk tabel */
     .table.table-sm td,
     .table.table-sm th {
         font-size: 0.85rem;
-        /* lebih kecil dari default */
-        padding: 0.4rem 0.5rem;
-        /* rapat tapi tetap nyaman */
+        padding: 0.45rem 0.5rem;
     }
 
-    /* Untuk header tabel */
-    .table.table-sm thead th {
+    /* Header tabel */
+    .table thead th {
         font-weight: 600;
         text-transform: capitalize;
+    }
+
+    /* Batasi lebar kolom */
+    th:nth-child(1),
+    td:nth-child(1) {
+        width: 120px;
+    }
+
+    /* Airwaybill */
+    th:nth-child(6),
+    td:nth-child(6) {
+        width: 200px;
+    }
+
+    /* Status */
+    th:nth-child(7),
+    td:nth-child(7) {
+        width: 180px;
+    }
+
+    /* Aksi */
+
+    /* Badge status agar wrap */
+    .badge-status {
+        white-space: normal;
+        word-break: break-word;
+        max-width: 200px;
+        font-size: 0.75rem;
+        padding: 0.35em 0.6em;
+    }
+
+    /* Tombol aksi lebih kecil */
+    .btn-sm i {
+        margin-right: 3px;
     }
 </style>
 
@@ -35,8 +67,7 @@
                 <div class="card-body">
                     <?php if (!empty($orders)): ?>
                         <div class="table-responsive">
-                            <table id="datatablesSimple"
-                                class="table table-bordered table-hover table-sm w-100 align-middle">
+                            <table id="datatablesSimple" class="table table-bordered table-hover table-sm align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Airwaybill</th>
@@ -48,17 +79,6 @@
                                         <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tfoot class="table-light">
-                                    <tr>
-                                        <th>Airwaybill</th>
-                                        <th>Created At</th>
-                                        <th>Created By</th>
-                                        <th>Updated At</th>
-                                        <th>Updated By</th>
-                                        <th>Status</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </tfoot>
                                 <tbody>
                                     <?php foreach ($orders as $o): ?>
                                         <tr>
@@ -71,45 +91,69 @@
                                                 <?php
                                                 $status = strtolower($o['status']);
                                                 $badgeClass = 'bg-secondary';
-                                                if ($status === 'Created') {
+                                                if ($status == 'created') {
                                                     $badgeClass = 'bg-warning text-dark';
-                                                } elseif ($status === 'Cancelled') {
+                                                } elseif ($status == 'pending') {
                                                     $badgeClass = 'bg-danger';
-                                                } elseif ($status === 'Complete') {
+                                                } elseif ($status == 'complete') {
                                                     $badgeClass = 'bg-success';
+                                                } elseif ($status == 'rejected') {
+                                                    $badgeClass = 'bg-danger';
+                                                } elseif ($status == 'approved') {
+                                                    $badgeClass = 'bg-primary text-white';
                                                 } else {
-                                                    // Status perjalanan atau sedang berada di mana
                                                     $badgeClass = 'bg-info text-dark';
                                                 }
                                                 ?>
-                                                <span class="badge <?= $badgeClass ?>">
+                                                <span class="badge badge-status <?= $badgeClass ?>">
                                                     <?= htmlspecialchars($o['status']) ?>
                                                 </span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex flex-wrap justify-content-center gap-1">
-                                                    <?php if (strtolower($o['status']) === 'Created'): ?>
+                                                    <?php if (strtolower($o['status']) === 'created'): ?>
                                                         <a href="<?= site_url('order/edit/' . $o['id']) ?>"
                                                             class="btn btn-sm btn-primary">
                                                             <i class="fas fa-edit"></i> Edit
                                                         </a>
+
+                                                        <!-- Tombol Process -->
+                                                        <button type="button" class="btn btn-sm btn-success btn-process"
+                                                            data-id="<?= $o['id'] ?>">
+                                                            <i class="fas fa-check-circle"></i> Process
+                                                        </button>
                                                     <?php else: ?>
                                                         <button class="btn btn-sm btn-primary" disabled>
                                                             <i class="fas fa-edit"></i> Edit
                                                         </button>
+                                                        <button type="button" class="btn btn-sm btn-success btn-process" disabled>
+                                                            <i class=" fas fa-check-circle"></i> Process
+                                                        </button>
                                                     <?php endif; ?>
+
                                                     <a href="<?= site_url('order/detail/' . $o['id']) ?>"
                                                         class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i> Detail
                                                     </a>
-                                                    <?php if (!$o['shipment_image']): ?>
+
+                                                    <?php if (!$o['shipment_image'] && strtolower($o['status']) !== 'rejected'): ?>
                                                         <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
                                                             class="btn btn-sm btn-warning">
                                                             <i class="fas fa-upload"></i> Upload
                                                         </a>
+                                                    <?php elseif (strtolower($o['status']) === 'rejected'): ?>
+                                                        <button class="btn btn-sm btn-warning" disabled>
+                                                            <i class="fas fa-upload"></i> Upload
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-sm btn-warning" disabled>
+                                                            <i class="fas fa-upload"></i> Upload
+                                                        </button>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
+
+
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -129,4 +173,56 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
         crossorigin="anonymous"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
+
+
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("click", function (e) {
+        if (e.target.closest(".btn-process")) {
+            const btn = e.target.closest(".btn-process");
+            const orderId = btn.getAttribute("data-id");
+
+            Swal.fire({
+                title: 'Process Order?',
+                text: "Pilih Approve atau Reject untuk order ini.",
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="fas fa-check"></i> Approve',
+                denyButtonText: '<i class="fas fa-times"></i> Reject',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                denyButtonColor: '#dc3545',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Swal loading sebelum redirect
+                    Swal.fire({
+                        title: 'Approving...',
+                        text: 'Sedang memproses approval order.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    setTimeout(() => {
+                        window.location.href = "<?= site_url('order/approve/') ?>" + orderId;
+                    }, 1500);
+                } else if (result.isDenied) {
+                    Swal.fire({
+                        title: 'Rejecting...',
+                        text: 'Sedang memproses penolakan order.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    setTimeout(() => {
+                        window.location.href = "<?= site_url('order/reject/') ?>" + orderId;
+                    }, 1500);
+                }
+            });
+        }
+    });
+</script>

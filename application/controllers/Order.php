@@ -48,20 +48,26 @@ class Order extends CI_Controller
                 unset($o);
             }
         }
-        
+
         if ($orders) {
             foreach ($orders as &$order) {
                 $latestStatus = null;
-                if (!empty($order['airwaybill'])) {
+                // Hanya proses jika status saat ini adalah 'Approved'
+                if (
+                    !in_array($order['status'], ['Rejected', 'Created']) &&
+                    !empty($order['airwaybill'])
+                ) {
                     $latestStatus = $this->Master_model->get_latest_tracking_status($order['airwaybill']);
-                    echo "<script>console.log('Latest XSAS: " . $latestStatus . "');</script>";
-                }
-                if (empty($latestStatus)) {
-                    $latestStatus = 'Created';
+                    if (empty($latestStatus)) {
+                        $latestStatus = 'Pending';
+                    }
                 }
 
-                // Update status jika berbeda
-                if ($order['status'] !== $latestStatus) {
+                // Update status jika status saat ini Approved dan latestStatus tidak kosong/null
+                if (
+                    !in_array($order['status'], ['Rejected', 'Created']) &&
+                    !empty($latestStatus)
+                ) {
                     $this->db->where('id', $order['id']);
                     $this->db->update('orders', ['status' => $latestStatus]);
                     // Refresh order array to get updated status
@@ -70,7 +76,7 @@ class Order extends CI_Controller
             }
             unset($order);
         }
-        
+
         $data['session'] = $session;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
@@ -594,6 +600,98 @@ class Order extends CI_Controller
             ]);
             redirect('order');
         }
+    }
+
+    public function approve($id)
+    {
+        $session = check_token();
+        $user = $session['user'];
+
+        // Hanya SUPER_ADMIN yang boleh approve
+        if (!in_array($user->code, ['SUPER_ADMIN', 'ADMIN'])) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Anda tidak memiliki akses untuk meng-approve order.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        $order = $this->db->get_where('orders', ['id' => $id])->row();
+        if (!$order) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        // Update status order menjadi "Approved"
+        $this->db->where('id', $id);
+        $this->db->update('orders', [
+            'status' => 'Approved',
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+            'updated_by' => $user->username
+        ]);
+
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'Order berhasil di-approve.',
+            'icon' => 'success'
+        ]);
+
+        log_activity($this, 'approve_order', 'Approve order dengan airwaybill: ' . $order->airwaybill);
+
+        redirect('/order');
+    }
+
+    public function reject($id)
+    {
+        $session = check_token();
+        $user = $session['user'];
+
+        // Hanya SUPER_ADMIN yang boleh reject
+        if (!in_array($user->code, ['SUPER_ADMIN', 'ADMIN'])) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Anda tidak memiliki akses untuk menolak order.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        $order = $this->db->get_where('orders', ['id' => $id])->row();
+        if (!$order) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
+
+        // Update status order menjadi "Rejected"
+        $this->db->where('id', $id);
+        $this->db->update('orders', [
+            'status' => 'Rejected',
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+            'updated_by' => $user->username
+        ]);
+
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'Order berhasil ditolak.',
+            'icon' => 'success'
+        ]);
+
+        log_activity($this, 'reject_order', 'Reject order dengan airwaybill: ' . $order->airwaybill);
+
+        redirect('/order');
     }
 
 }

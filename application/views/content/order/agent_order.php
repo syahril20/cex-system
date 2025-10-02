@@ -49,17 +49,20 @@
                                                     <?php
                                                     $status = strtolower($o['status']);
                                                     $badgeClass = 'bg-secondary';
-
-                                                    if ($status === 'created') {
+                                                    if ($status == 'created') {
                                                         $badgeClass = 'bg-warning text-dark';
-                                                    } elseif ($status === 'cancelled') {
+                                                    } elseif ($status == 'pending') {
                                                         $badgeClass = 'bg-danger';
-                                                    } elseif ($status === 'complete') {
+                                                    } elseif ($status == 'complete') {
                                                         $badgeClass = 'bg-success';
+                                                    } elseif ($status == 'rejected') {
+                                                        $badgeClass = 'bg-danger';
+                                                    } elseif ($status == 'approved') {
+                                                        $badgeClass = 'bg-primary text-white';
                                                     } else {
-                                                        // Status perjalanan atau sedang berada di mana
                                                         $badgeClass = 'bg-info text-dark';
                                                     }
+
                                                     ?>
                                                     <span class="badge <?= $badgeClass ?>">
                                                         <?= htmlspecialchars($o['status']) ?>
@@ -76,11 +79,19 @@
                                                         </a>
 
                                                         <!-- Tombol Upload Image -->
-                                                        <?php if (!$o['shipment_image']): ?>
+                                                        <?php if (!$o['shipment_image'] && strtolower($o['status']) !== 'rejected'): ?>
                                                             <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
-                                                                class="btn btn-sm btn-warning d-inline-flex align-items-center">
-                                                                <i class="fas fa-upload fa-sm me-1"></i> Upload Image
+                                                                class="btn btn-sm btn-warning">
+                                                                <i class="fas fa-upload"></i> Upload
                                                             </a>
+                                                        <?php elseif (strtolower($o['status']) === 'rejected'): ?>
+                                                            <button class="btn btn-sm btn-warning" disabled>
+                                                                <i class="fas fa-upload"></i> Upload
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-warning" disabled>
+                                                                <i class="fas fa-upload"></i> Upload
+                                                            </button>
                                                         <?php endif; ?>
                                                     </div>
                                                 </td>
