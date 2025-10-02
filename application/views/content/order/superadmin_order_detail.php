@@ -32,7 +32,8 @@
             <?php if ($order): ?>
                 <!-- Card: Informasi Order -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
+                    <div
+                        class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
                         <div><i class="fas fa-info-circle me-2"></i> Informasi Order</div>
                     </div>
                     <div class="card-body p-0">
@@ -56,14 +57,21 @@
                                         <?php
                                         $status = strtolower($order['status']);
                                         $badgeClass = 'bg-secondary';
-                                        if ($status === 'success' || $status === 'completed')
+                                        if ($status === 'complete') {
                                             $badgeClass = 'bg-success';
-                                        elseif ($status === 'pending')
-                                            $badgeClass = 'bg-warning text-dark';
-                                        elseif ($status === 'failed' || $status === 'cancelled')
+                                        } elseif ($status === 'created') {
+                                            $badgeClass = 'bg-primary';
+                                        } elseif ($status === 'cancelled') {
                                             $badgeClass = 'bg-danger';
+                                        } else {
+                                            // Status perjalanan atau sedang berada di lokasi tertentu
+                                            $badgeClass = 'bg-info text-dark';
+                                        }
                                         ?>
-                                        <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($order['status']) ?></span>
+                                        <span class="badge <?= $badgeClass ?> text-wrap text-start"
+                                            style="white-space: normal; word-break: break-word; max-width: 350x; display: inline-block; line-height:1.2;">
+                                            <?= htmlspecialchars($order['status']) ?>
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -89,7 +97,8 @@
 
                 <!-- Card: Data Pengiriman -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center bg-secondary text-white">
+                    <div
+                        class="card-header d-flex flex-wrap justify-content-between align-items-center bg-secondary text-white">
                         <div><i class="fas fa-database me-2"></i> Data Pengiriman</div>
                     </div>
                     <div class="card-body p-0">
@@ -109,8 +118,9 @@
                                                             <div class="accordion-item mb-2">
                                                                 <h2 class="accordion-header" id="heading<?= $collapseId ?>">
                                                                     <button class="accordion-button collapsed py-2" type="button"
-                                                                        data-bs-toggle="collapse" data-bs-target="#collapse<?= $collapseId ?>"
-                                                                        aria-expanded="false" aria-controls="collapse<?= $collapseId ?>">
+                                                                        data-bs-toggle="collapse"
+                                                                        data-bs-target="#collapse<?= $collapseId ?>" aria-expanded="false"
+                                                                        aria-controls="collapse<?= $collapseId ?>">
                                                                         <i class="fas fa-box me-2"></i> Item <?= $idx + 1 ?> -
                                                                         <?= htmlspecialchars($detail['name'] ?? '-') ?>
                                                                     </button>
@@ -123,7 +133,8 @@
                                                                             <table class="table table-sm table-borderless mb-0 w-100">
                                                                                 <?php foreach ($detail as $dKey => $dVal): ?>
                                                                                     <tr>
-                                                                                        <th style="width:150px;"><?= ucwords(str_replace('_', ' ', $dKey)) ?></th>
+                                                                                        <th style="width:150px;">
+                                                                                            <?= ucwords(str_replace('_', ' ', $dKey)) ?></th>
                                                                                         <td><?= htmlspecialchars($dVal) ?></td>
                                                                                     </tr>
                                                                                 <?php endforeach; ?>

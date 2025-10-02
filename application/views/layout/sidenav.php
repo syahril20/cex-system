@@ -47,12 +47,15 @@
 
 <div id="layoutSidenav">
 
+    <!-- Sidebar -->
     <div id="layoutSidenav_nav">
         <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+
             <div class="sb-sidenav-menu">
                 <div class="nav">
-                    <div class="sb-sidenav-menu-heading">Core</div>
 
+                    <!-- Core -->
+                    <div class="sb-sidenav-menu-heading">Core</div>
                     <a class="nav-link <?= ($page == 'Dashboard') ? 'active' : '' ?>" href="<?= site_url('/') ?>">
                         <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                         Dashboard
@@ -67,16 +70,19 @@
                     <!-- Super Admin -->
                     <?php if ($code === "SUPER_ADMIN"): ?>
                         <div class="sb-sidenav-menu-heading">Control</div>
-                        <a class="nav-link <?= ($page == 'UserManagement' || $page == 'UserEdit' || $page == 'UserCreate') ? 'active' : '' ?>"
+
+                        <a class="nav-link <?= in_array($page, ['UserManagement', 'UserEdit', 'UserCreate']) ? 'active' : '' ?>"
                             href="<?= site_url('/user') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-shield"></i></div>
                             User
                         </a>
+
                         <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-tag"></i></div>
                             Roles
                         </a>
-                        <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail') ? 'active' : '' ?>"
+
+                        <a class="nav-link <?= in_array($page, ['Order', 'OrderEdit', 'OrderDetail']) ? 'active' : '' ?>"
                             href="<?= site_url('/order') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
@@ -86,16 +92,19 @@
                     <!-- Admin -->
                     <?php if ($code === 'ADMIN'): ?>
                         <div class="sb-sidenav-menu-heading">Control</div>
-                        <a class="nav-link <?= ($page == 'UserManagement' || $page == 'UserEdit' || $page == 'UserCreate') ? 'active' : '' ?>"
+
+                        <a class="nav-link <?= in_array($page, ['UserManagement', 'UserEdit', 'UserCreate']) ? 'active' : '' ?>"
                             href="<?= site_url('/user') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-gear"></i></div>
                             User
                         </a>
+
                         <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-lock"></i></div>
                             Roles
                         </a>
-                        <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail') ? 'active' : '' ?>"
+
+                        <a class="nav-link <?= in_array($page, ['Order', 'OrderEdit', 'OrderDetail']) ? 'active' : '' ?>"
                             href="<?= site_url('/order') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
@@ -105,15 +114,18 @@
                     <!-- Agent -->
                     <?php if ($code === 'AGENT'): ?>
                         <div class="sb-sidenav-menu-heading">Order</div>
-                        <a class="nav-link <?= ($page == 'Order' || $page == 'OrderEdit' || $page == 'OrderDetail' || $page == 'OrderForm' || $page == 'UploadForm') ? 'active' : '' ?>"
+
+                        <a class="nav-link <?= in_array($page, ['Order', 'OrderEdit', 'OrderDetail', 'OrderForm', 'UploadForm']) ? 'active' : '' ?>"
                             href="<?= site_url('/order') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-box-open"></i></div>
                             Order
                         </a>
                     <?php endif; ?>
+
                 </div>
             </div>
 
+            <!-- Footer -->
             <div class="sb-sidenav-footer">
                 <div class="small">Logged in as:</div>
                 <span class="fw-bold"><?= $username ?></span>
@@ -121,69 +133,71 @@
         </nav>
     </div>
 
+    <!-- Content Loader -->
     <?php
-    if (isset($page) && ($page != null || $page == '')) {
-        if ($page == 'Dashboard') {
-            if ($code === 'SUPER_ADMIN') {
-                $this->load->view('content/dashboard/superadmin_dashboard');
-            }
-            if ($code === 'ADMIN') {
-                $this->load->view('content/dashboard/admin_dashboard');
-            }
-            if ($code === 'AGENT') {
-                $this->load->view('content/dashboard/agent_dashboard');
-            }
-        }
-        if ($page == 'Order') {
-            if ($code === 'SUPER_ADMIN') {
-                $this->load->view('content/order/superadmin_order');
-            }
-            if ($code === 'AGENT') {
-                $this->load->view('content/order/agent_order');
-            }
-        }
-        if ($page == 'OrderForm') {
-            if ($code === 'AGENT') {
-                $this->load->view('content/order/agent_order_form');
-            }
-        }
-        if ($page == 'OrderDetail') {
-            if ($code === 'SUPER_ADMIN') {
-                $this->load->view('content/order/superadmin_order_detail');
-            }
-            if ($code === 'AGENT') {
-                $this->load->view('content/order/agent_order_detail');
-            }
-        }
-        if ($page == 'OrderEdit') {
-            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                $this->load->view('content/order/admin_order_edit');
-            }
-        }
-        if ($page == 'UploadForm') {
-            if ($code === 'AGENT') {
-                $this->load->view('content/order/agent_upload_form');
-            }
-        }
-        if ($page == 'UserManagement') {
-            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                $this->load->view('content/user/user_management');
-            }
-        }
-        if ($page == 'UserEdit') {
-            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                $this->load->view('content/user/user_edit');
-            }
-        }
-        if ($page == 'UserCreate') {
-            if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                $this->load->view('content/user/user_create');
-            }
-        }
-        if ($page == 'Profile') {
-            $this->load->view('profile/index');
-        }
+    if (!empty($page)) {
+        switch ($page) {
+            case 'Dashboard':
+                if ($code === 'SUPER_ADMIN')
+                    $this->load->view('content/dashboard/superadmin_dashboard');
+                if ($code === 'ADMIN')
+                    $this->load->view('content/dashboard/admin_dashboard');
+                if ($code === 'AGENT')
+                    $this->load->view('content/dashboard/agent_dashboard');
+                break;
 
+            case 'Order':
+                if ($code === 'SUPER_ADMIN')
+                    $this->load->view('content/order/superadmin_order');
+                if ($code === 'AGENT')
+                    $this->load->view('content/order/agent_order');
+                break;
+
+            case 'OrderForm':
+                if ($code === 'AGENT')
+                    $this->load->view('content/order/agent_order_form');
+                break;
+
+            case 'OrderDetail':
+                if ($code === 'SUPER_ADMIN')
+                    $this->load->view('content/order/superadmin_order_detail');
+                if ($code === 'AGENT')
+                    $this->load->view('content/order/agent_order_detail');
+                break;
+
+            case 'OrderEdit':
+                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                    $this->load->view('content/order/admin_order_edit');
+                }
+                break;
+
+            case 'UploadForm':
+                if ($code === 'AGENT')
+                    $this->load->view('content/order/agent_upload_form');
+                break;
+
+            case 'UserManagement':
+                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                    $this->load->view('content/user/user_management');
+                }
+                break;
+
+            case 'UserEdit':
+                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                    $this->load->view('content/user/user_edit');
+                }
+                break;
+
+            case 'UserCreate':
+                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
+                    $this->load->view('content/user/user_create');
+                }
+                break;
+
+            case 'Profile':
+                $this->load->view('profile/index');
+                break;
+        }
     }
     ?>
 </div>

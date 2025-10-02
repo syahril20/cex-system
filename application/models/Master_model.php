@@ -38,7 +38,7 @@ class Master_model extends CI_Model
             $response = $client->request('GET', $url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->token,
-                    'Accept'        => 'application/json'
+                    'Accept' => 'application/json'
                 ]
             ]);
 
@@ -60,4 +60,71 @@ class Master_model extends CI_Model
             return [];
         }
     }
+
+    public function get_latest_tracking_status($airwaybill)
+    {
+        $result = $this->get_tracking($airwaybill);
+
+        echo "<script>console.log('Tracking Result:ad " . json_encode($result) . "');</script>";
+
+        if (empty($result) || empty($result['trackings'])) {
+            return null;
+        }
+
+        $trackings = $result['trackings'];
+
+
+        // Urutkan berdasarkan date + time terbaru
+        usort($trackings, function ($a, $b) {
+            $datetimeA = strtotime($a['date'] . ' ' . $a['time']);
+            $datetimeB = strtotime($b['date'] . ' ' . $b['time']);
+            return $datetimeB <=> $datetimeA; // descending
+        });
+
+
+        // Ambil status terbaru
+        return $trackings[0]['status'] ?? null;
+    }
+
+
+    public function get_tracking($airwaybill)
+    {
+        try {
+            $client = new Client();
+            $url = $this->api_base_url . getenv('API_CEX_TRACKING_ENDPOINT');
+            // Pastikan API_CEX_TRACKING_ENDPOINT = '/v2/service/trackings' di .env
+
+            $response = $client->request('POST', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'airwaybill' => $airwaybill
+                ]
+            ]);
+
+
+            $body = $response->getBody()->getContents();
+            $result = json_decode($body, true);
+
+            return (isset($result['status']) && $result['status'] == 200)
+                ? $result
+                : [];
+
+        } catch (RequestException $e) {
+            $msg = $e->hasResponse()
+                ? $e->getResponse()->getBody()->getContents()
+                : $e->getMessage();
+            log_message('error', 'Tracking Request Error: ' . $msg);
+            return [];
+        } catch (\Exception $e) {
+            log_message('error', 'General Error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+
+
 }

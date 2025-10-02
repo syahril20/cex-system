@@ -1,3 +1,20 @@
+<style>
+    /* Ukuran font tabel lebih kecil */
+    .table.table-sm td,
+    .table.table-sm th {
+        font-size: 0.85rem;
+        /* lebih kecil dari default */
+        padding: 0.4rem 0.5rem;
+        /* rapat tapi tetap nyaman */
+    }
+
+    /* Untuk header tabel */
+    .table.table-sm thead th {
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+</style>
+
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -18,7 +35,8 @@
                 <div class="card-body">
                     <?php if (!empty($orders)): ?>
                         <div class="table-responsive">
-                            <table id="datatablesSimple" class="table table-bordered table-hover align-middle w-100">
+                            <table id="datatablesSimple"
+                                class="table table-bordered table-hover table-sm w-100 align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Airwaybill</th>
@@ -53,12 +71,16 @@
                                                 <?php
                                                 $status = strtolower($o['status']);
                                                 $badgeClass = 'bg-secondary';
-                                                if ($status === 'success' || $status === 'completed')
-                                                    $badgeClass = 'bg-success';
-                                                elseif ($status === 'pending')
+                                                if ($status === 'Created') {
                                                     $badgeClass = 'bg-warning text-dark';
-                                                elseif ($status === 'failed' || $status === 'cancelled')
+                                                } elseif ($status === 'Cancelled') {
                                                     $badgeClass = 'bg-danger';
+                                                } elseif ($status === 'Complete') {
+                                                    $badgeClass = 'bg-success';
+                                                } else {
+                                                    // Status perjalanan atau sedang berada di mana
+                                                    $badgeClass = 'bg-info text-dark';
+                                                }
                                                 ?>
                                                 <span class="badge <?= $badgeClass ?>">
                                                     <?= htmlspecialchars($o['status']) ?>
@@ -66,10 +88,16 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex flex-wrap justify-content-center gap-1">
-                                                    <a href="<?= site_url('order/edit/' . $o['id']) ?>"
-                                                        class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
+                                                    <?php if (strtolower($o['status']) === 'Created'): ?>
+                                                        <a href="<?= site_url('order/edit/' . $o['id']) ?>"
+                                                            class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-sm btn-primary" disabled>
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </button>
+                                                    <?php endif; ?>
                                                     <a href="<?= site_url('order/detail/' . $o['id']) ?>"
                                                         class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i> Detail

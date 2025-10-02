@@ -48,6 +48,29 @@ class Order extends CI_Controller
                 unset($o);
             }
         }
+        
+        if ($orders) {
+            foreach ($orders as &$order) {
+                $latestStatus = null;
+                if (!empty($order['airwaybill'])) {
+                    $latestStatus = $this->Master_model->get_latest_tracking_status($order['airwaybill']);
+                    echo "<script>console.log('Latest XSAS: " . $latestStatus . "');</script>";
+                }
+                if (empty($latestStatus)) {
+                    $latestStatus = 'Created';
+                }
+
+                // Update status jika berbeda
+                if ($order['status'] !== $latestStatus) {
+                    $this->db->where('id', $order['id']);
+                    $this->db->update('orders', ['status' => $latestStatus]);
+                    // Refresh order array to get updated status
+                    $order['status'] = $latestStatus;
+                }
+            }
+            unset($order);
+        }
+        
         $data['session'] = $session;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
@@ -554,4 +577,23 @@ class Order extends CI_Controller
 
         $this->load->view('base_page', ['data' => $data]);
     }
+
+    public function tracking()
+    {
+        $airwaybill = $this->input->post('airwaybill'); // ambil dari form input
+        $trackingData = $this->Master_model->get_tracking($airwaybill);
+
+        if (!empty($trackingData)) {
+            $data['tracking'] = $trackingData;
+            $this->load->view('order/tracking_result', $data);
+        } else {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Data tracking tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('order');
+        }
+    }
+
 }

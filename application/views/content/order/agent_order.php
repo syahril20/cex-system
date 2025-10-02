@@ -49,12 +49,16 @@
                                                     <?php
                                                     $status = strtolower($o['status']);
                                                     $badgeClass = 'bg-secondary';
-                                                    if ($status === 'success' || $status === 'completed') {
-                                                        $badgeClass = 'bg-success';
-                                                    } elseif ($status === 'pending') {
+
+                                                    if ($status === 'created') {
                                                         $badgeClass = 'bg-warning text-dark';
-                                                    } elseif ($status === 'failed' || $status === 'cancelled') {
+                                                    } elseif ($status === 'cancelled') {
                                                         $badgeClass = 'bg-danger';
+                                                    } elseif ($status === 'complete') {
+                                                        $badgeClass = 'bg-success';
+                                                    } else {
+                                                        // Status perjalanan atau sedang berada di mana
+                                                        $badgeClass = 'bg-info text-dark';
                                                     }
                                                     ?>
                                                     <span class="badge <?= $badgeClass ?>">
