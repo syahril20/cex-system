@@ -2,7 +2,8 @@
     .stat-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s;
         cursor: pointer;
-        border-radius: 0.75rem; /* rounded-3 */
+        border-radius: 0.75rem;
+        /* rounded-3 */
     }
 
     .stat-card:hover {
@@ -98,7 +99,8 @@
                 <div class="card-body">
                     <?php if (!empty($recent_activities)): ?>
                         <div class="table-responsive">
-                            <table id="datatablesSimple" class="table table-bordered table-hover table-sm w-100 align-middle">
+                            <table id="datatablesSimple"
+                                class="table table-bordered table-hover table-sm w-100 align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Username</th>
@@ -141,6 +143,14 @@
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <?php if (isset($data['from_cache'])): ?>
+                <small style="font-size:12px; color:<?= $data['from_cache'] ? 'green' : 'red' ?>">
+                    <?= $data['from_cache'] ? 'Data dari CACHE' : 'Data fresh dari DB' ?>
+                </small>
+            <?php endif; ?>
+
+
 
         </div>
     </main>
@@ -148,7 +158,8 @@
     <?php $this->load->view('layout/footer'); ?>
 
     <!-- DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const table = document.getElementById("datatablesSimple");
