@@ -41,7 +41,7 @@
 
                         <!-- Password -->
                         <div class="mb-3">
-                            <label for="password" class="form-label fw-bold">Password 
+                            <label for="password" class="form-label fw-bold">Password
                                 <small class="text-muted">(leave blank if unchanged)</small>
                             </label>
                             <input type="password" class="form-control" id="password" name="password"
@@ -71,31 +71,5 @@
         crossorigin="anonymous"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('form[action*="do_edit"]');
-            const btn = document.getElementById('btn-update-user');
-            if (form && btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "Update this user data?",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, update it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            }
-        });
-    </script>
+    <?php $this->load->view('components/user_edit_modal'); ?>
 </div>

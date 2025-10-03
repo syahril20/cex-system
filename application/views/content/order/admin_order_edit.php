@@ -189,26 +189,6 @@
                 renderShipmentDetails();
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            renderShipmentDetails();
-            const form = document.querySelector('form[action*="do_edit"]');
-            const btn = document.getElementById('btn-update-order');
-
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Update Order?',
-                    text: "Pastikan data sudah benar.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, update!'
-                }).then(result => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
-        });
     </script>
+    <?php $this->load->view('components/order_edit_modal'); ?>
 </div>

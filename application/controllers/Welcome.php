@@ -41,7 +41,7 @@ class Welcome extends CI_Controller
 			$this->db->join('users', 'users.id = activity.user_id', 'left');
 			// Compare using GMT+7 (Asia/Jakarta)
 			$dt = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
-			$dt->modify('-6 hours');
+			$dt->modify('-12 hours');
 			$this->db->where('activity.created_at >=', $dt->format('Y-m-d H:i:s'));
 			$this->db->order_by('activity.created_at', 'DESC');
 			$data['recent_activities'] = $this->db->get()->result_array();

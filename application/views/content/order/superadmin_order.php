@@ -177,52 +177,5 @@
 
 
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener("click", function (e) {
-        if (e.target.closest(".btn-process")) {
-            const btn = e.target.closest(".btn-process");
-            const orderId = btn.getAttribute("data-id");
 
-            Swal.fire({
-                title: 'Process Order?',
-                text: "Pilih Approve atau Reject untuk order ini.",
-                icon: 'question',
-                showCancelButton: true,
-                showDenyButton: true,
-                confirmButtonText: '<i class="fas fa-check"></i> Approve',
-                denyButtonText: '<i class="fas fa-times"></i> Reject',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#28a745',
-                denyButtonColor: '#dc3545',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Swal loading sebelum redirect
-                    Swal.fire({
-                        title: 'Approving...',
-                        text: 'Sedang memproses approval order.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    setTimeout(() => {
-                        window.location.href = "<?= site_url('order/approve/') ?>" + orderId;
-                    }, 1500);
-                } else if (result.isDenied) {
-                    Swal.fire({
-                        title: 'Rejecting...',
-                        text: 'Sedang memproses penolakan order.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    setTimeout(() => {
-                        window.location.href = "<?= site_url('order/reject/') ?>" + orderId;
-                    }, 1500);
-                }
-            });
-        }
-    });
-</script>
+    <?php $this->load->view('components/order_process_modal'); ?>

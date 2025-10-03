@@ -4,7 +4,8 @@
             <h1 class="mt-4 mb-4">Data User</h1>
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
+                <div
+                    class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
                     <div class="mb-2 mb-sm-0">
                         <i class="fas fa-users me-1"></i>
                         Data User Table
@@ -50,11 +51,9 @@
                                                     <span class="badge bg-info text-dark"><?= htmlspecialchars($o['role']) ?></span>
                                                 </td>
                                                 <td><?= htmlspecialchars($o['updated_at']) ?></td>
+                                                <td><?= !empty($o['updated_by']) ? htmlspecialchars($o['updated_by']) : '' ?></td>
                                                 <td>
-                                                    <?= !empty($o['updated_by']) ? htmlspecialchars($o['updated_by']) : '' ?>
-                                                </td>
-                                                <td>
-                                                    <?php if ($o['disabled_at']): ?>
+                                                    <?php if (!empty($o['disabled_at'])): ?>
                                                         <span class="badge bg-danger"><?= htmlspecialchars($o['disabled_at']) ?></span>
                                                     <?php else: ?>
                                                         <span class="badge bg-success">Active</span>
@@ -62,21 +61,18 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                        <!-- Tombol Edit -->
                                                         <a href="<?= site_url('user/edit/' . $o['id']) ?>"
-                                                           class="btn btn-sm btn-primary">
+                                                            class="btn btn-sm btn-primary">
                                                             <i class="fas fa-edit"></i> Edit
                                                         </a>
-                                                        <?php if ($o['disabled_at'] !== null): ?>
-                                                            <a href="<?= site_url('user/activate/' . $o['id']) ?>"
-                                                               class="btn btn-sm btn-success">
-                                                                <i class="fas fa-check"></i> Activate
-                                                            </a>
-                                                        <?php else: ?>
-                                                            <a href="<?= site_url('user/delete/' . $o['id']) ?>"
-                                                               class="btn btn-sm btn-danger btn-delete">
-                                                                <i class="fas fa-ban"></i> Disable
-                                                            </a>
-                                                        <?php endif; ?>
+                                                        <!-- Tombol Activation -->
+                                                        <button type="button" class="btn btn-sm btn-warning btn-activation"
+                                                            data-id="<?= $o['id'] ?>"
+                                                            data-username="<?= htmlspecialchars($o['username']) ?>"
+                                                            data-disabled="<?= !empty($o['disabled_at']) && $o['disabled_at'] !== '0000-00-00 00:00:00' ? '1' : '0' ?>">
+                                                            <i class="fas fa-power-off"></i> Activation
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -101,32 +97,5 @@
         crossorigin="anonymous"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.body.addEventListener('click', function (e) {
-                const btn = e.target.closest('.btn-delete');
-                if (!btn) return;
-
-                e.preventDefault();
-                const url = btn.getAttribute('href');
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "This user will be disabled.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, disable it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = url;
-                    }
-                });
-            });
-        });
-    </script>
+    <?php $this->load->view('components/user_activation_modal'); ?>
 </div>
