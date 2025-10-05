@@ -11,9 +11,9 @@ class Role_model extends CI_Model
     }
 
     // Get all roles
-    public function get_all()
+    public function get_all_roles()
     {
-        return $this->db->get($this->table)->result();
+        return $this->db->get($this->table)->result_array();
     }
 
     // Get role by ID
@@ -47,4 +47,5 @@ class Role_model extends CI_Model
     {
         return $this->db->get_where($this->table, ['user_id' => $user_id])->result();
     }
+    
 }

@@ -1,6 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * Profile Controller
+ * Manages user profile and password updates
+ * @property CI_DB $db
+ * @property CI_Session $session
+ * @property Activity_model $Activity_model
+ * @property CI_Input $input
+ */
 class Profile extends CI_Controller
 {
     public function __construct()
@@ -9,18 +17,20 @@ class Profile extends CI_Controller
         $this->load->database();
         $this->load->library('session');
         $this->load->helper(['url', 'form', 'activity', 'utils']);
+        $this->load->model('Activity_model');
     }
     
     public function index()
     {
         $session = check_token();
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
         // Ambil aktivitas terbaru user
         $this->db->where('user_id', $user->id);
         $this->db->order_by('created_at', 'DESC');
         $this->db->limit(10);
-        $recent_activities = $this->db->get('activity')->result_array();
+        $recent_activities = $this->Activity_model->get_user_recent_activities($user);
 
         // Jika role AGENT bisa ambil saldo
         // $saldo = null;
@@ -29,11 +39,12 @@ class Profile extends CI_Controller
         // }
         
         // $data['saldo'] = $saldo;
-        $data['session'] = $session;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['recent_activities'] = $recent_activities;
         $data['page'] = 'Profile';
 
-        $this->load->view('base_page', ['data' => $data]);
+        $this->load->view('base_page', $data);
     }
 
     public function update_password()

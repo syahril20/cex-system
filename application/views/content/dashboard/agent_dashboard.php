@@ -90,7 +90,6 @@
                 </div>
             </div>
 
-
             <!-- Riwayat & Aktivitas -->
             <div class="row">
                 <!-- Riwayat -->

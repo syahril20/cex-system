@@ -1,38 +1,49 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * @property User_model $User_model
+ * @property Role_model $Role_model
+ * @property CI_Session $session
+ * @property CI_Cache $cache
+ * @property CI_Input $input
+ */
 class User extends CI_Controller
 {
 
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('User_model');
-        $this->load->model('Role_model');
+        $this->load->model(['User_model', 'Role_model']);
         $this->load->helper(['url', 'form', 'activity', 'utils']);
     }
 
     public function index()
     {
-        $session = check_token();
-        $user = $session['user'];
+        $session = $this->session->userdata();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
+        if (!$user || !$token) {
+            return force_logout('Data pengguna tidak ditemukan.');
+        }
+
+        $data['token'] = $token;
+        $data['user'] = $user;
+        $data['page'] = 'UserManagement';
+
         // Ambil user yang bisa dilihat sesuai role
         if ($user->code == 'SUPER_ADMIN') {
             // SUPER_ADMIN tidak bisa melihat user dengan role yang sama (SUPER_ADMIN lain)
-            $users = $this->User_model->get_all_except_role($user->id, 'SUPER_ADMIN');
+            $data['users'] = $this->User_model->get_all_except_role($user->id, 'SUPER_ADMIN') ?? [];
         } elseif ($user->code == 'ADMIN') {
             // ADMIN hanya bisa melihat user dengan role AGENT
-            $users = $this->User_model->get_all_by_role('AGENT');
+            $data['users'] = $this->User_model->get_all_by_role('AGENT') ?? [];
         } else {
-            $users = [];
+            $data['users'] = [];
         }
 
-        $data['session'] = $session;
-        $data['users'] = !empty($users) ? $users : [];
-        $data['page'] = 'UserManagement';
-
         if ($user->code == 'SUPER_ADMIN' || $user->code == 'ADMIN') {
-            $this->load->view('base_page', ['data' => $data]);
+            $this->load->view('base_page', $data);
         } else {
             redirect('/');
         }
@@ -41,16 +52,18 @@ class User extends CI_Controller
     public function create()
     {
         $session = check_token();
-        $roles = $this->Role_model->get_all();
+        $roles = $this->Role_model->get_all_roles();
 
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['roles'] = $roles;
-        $data['session'] = $session;
         $data['page'] = 'UserCreate';
 
         if ($user->code == 'SUPER_ADMIN' || $user->code == 'ADMIN') {
-            $this->load->view('base_page', ['data' => $data]);
+            $this->load->view('base_page', $data);
         } else {
             redirect('/');
         }
@@ -115,10 +128,11 @@ class User extends CI_Controller
         $session = check_token();
 
         $users = $this->User_model->get_by_id($id);
-        $roles = $this->Role_model->get_all();
-        $user = $session['user'];
+        $roles = $this->Role_model->get_all_roles();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
-        if (empty($users) || $session['user']->id == $users->id) {
+        if (empty($users)) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
                 'text' => 'User tidak ditemukan',
@@ -127,13 +141,14 @@ class User extends CI_Controller
             redirect('user');
             return;
         }
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['roles'] = $roles;
-        $data['session'] = $session;
         $data['page'] = 'UserEdit';
         $data['users'] = $users;
 
         if ($user->code == 'SUPER_ADMIN' || $user->code == 'ADMIN') {
-            $this->load->view('base_page', ['data' => $data]);
+            $this->load->view('base_page', $data);
         } else {
             redirect('/');
         }
@@ -176,10 +191,13 @@ class User extends CI_Controller
             'updated_by' => $session['user']->username
         ];
 
-
-        log_activity($this, 'edit_user', 'Mengedit user dengan Username: ' . $data['username']);
-
         $this->User_model->update($id, $data);
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'User berhasil diupdate.',
+            'icon' => 'success'
+        ]);
+        log_activity($this, 'edit_user', 'Mengedit user dengan Username: ' . $data['username']);
         redirect('user');
     }
 

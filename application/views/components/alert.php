@@ -1,5 +1,5 @@
 <?php if ($this->session->flashdata('swal')): ?>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="<?= base_url('assets/js/sweetalert2@11.js') ?>"></script>
     <script>
         Swal.fire({
             title: '<?= $this->session->flashdata("swal")["title"] ?>',

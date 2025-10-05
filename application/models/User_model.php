@@ -96,4 +96,25 @@ class User_model extends CI_Model
         $this->db->where('roles.code', $roleCode);
         return $this->db->get()->result_array();
     }
+
+    public function count_all_admin()
+    {
+        $this->db->from('users');
+        $this->db->join('roles', 'roles.id = users.role_id', 'left');
+        $this->db->where('roles.code', 'ADMIN');
+        return $this->db->count_all_results();
+    }
+
+    public function count_all_users()
+    {
+        return $this->db->count_all($this->table);
+    }
+
+    public function count_all_agent()
+    {
+        $this->db->from('users');
+        $this->db->join('roles', 'roles.id = users.role_id', 'left');
+        $this->db->where('roles.code', 'AGENT');
+        return $this->db->count_all_results();
+    }
 }

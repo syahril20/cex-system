@@ -1,113 +1,139 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * Controller untuk halaman welcome/dashboard
+ * @property Activity_model $Activity_model
+ * @property User_model $User_model
+ * @property Order_model $Order_model
+ * @property Role_model $Role_model
+ * @property CI_Session $session
+ * @property CI_Cache $cache
+ */
 class Welcome extends CI_Controller
 {
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->library(['session', 'cache']);
+		$this->load->helper(['url', 'utils']);
+		$this->load->model(['Activity_model', 'User_model', 'Order_model', 'Role_model']);
+	}
+
 	public function index()
 	{
-		$session = $this->check_token();
-
-		// Get admin role ID
-		$admin_role = $this->db->get_where('roles', ['code' => 'ADMIN'])->row();
-		$admin_role_id = $admin_role ? $admin_role->id : 0;
-
-		$user = $session['user'];
-
-		// Data default
-		$data = [
-			'session' => $session,
-			'page' => 'Dashboard',
-		];
-
-		// Key cache unik per role/user
-		$cache_key = 'dashboard_' . strtolower($user->code) . '_' . $user->id;
-
-		// Ambil cache
-		$dashboard_data = $this->cache->get($cache_key);
-
-		if ($dashboard_data === false) {
-			// 🚨 Cache MISS → ambil dari DB
-			$dashboard_data = [];
-
-			if ($user->code === 'SUPER_ADMIN') {
-				$this->db->select('activity.*, users.username');
-				$this->db->from('activity');
-				$this->db->join('users', 'users.id = activity.user_id', 'left');
-
-				$dt = new DateTime('now', new DateTimeZone('Asia/Jakarta'));
-				$dt->modify('-12 hours');
-				$this->db->where('activity.created_at >=', $dt->format('Y-m-d H:i:s'));
-				$this->db->order_by('activity.created_at', 'DESC');
-				$dashboard_data['recent_activities'] = $this->db->get()->result_array();
-
-				$dashboard_data['total_users'] = (int) $this->db->count_all('users');
-				$dashboard_data['total_admin'] = (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users');
-				$dashboard_data['total_orders'] = (int) $this->db->count_all('orders');
-			}
-
-			if ($user->code === 'AGENT') {
-				$dashboard_data['total_orders'] = (int) $this->db
-					->where('created_by', $user->username)
-					->count_all_results('orders');
-
-				$dashboard_data['today_orders'] = (int) $this->db
-					->where('created_by', $user->username)
-					->where('DATE(created_at)', date('Y-m-d', time() + 7 * 3600))
-					->count_all_results('orders');
-			}
-
-			$dashboard_data['from_cache'] = false;
-
-			// Simpan cache
-			$this->cache->save($cache_key, $dashboard_data, 86400);
-			echo "<script>console.log('Cache MISS (DB query). Key: {$cache_key}');</script>";
-		} else {
-			// 🚨 Cache HIT
-			$dashboard_data['from_cache'] = true;
-			echo "<script>console.log('Cache HIT (pakai cache). Key: {$cache_key}');</script>";
+		$session = check_token();
+		$token = $session['token'] ?? null;
+		$user = $session['user'] ?? null;
+		if (!$user || !$token) {
+			return force_logout('Data pengguna tidak ditemukan.');
 		}
 
-		// Debug isi cache
-		debug_cache($cache_key);
+		$data['token'] = $token;
+		$data['user'] = $user;
+		$data['page'] = 'Dashboard';
 
-		// Gabung ke view
-		$data = array_merge($data, $dashboard_data);
+		$code = $user->code ?? '';
+		if ($code && $code === 'SUPER_ADMIN') {
+			$data['recent_activities'] = $this->Activity_model->get_recent_activities() ?? [];
+			$data['total_users'] = $this->User_model->count_all_users() ?? 0;
+			$data['total_admin'] = $this->User_model->count_all_admin() ?? 0;
+			$data['total_orders'] = $this->Order_model->count_all_orders() ?? 0;
+		}
+		if ($code && $code === 'ADMIN') {
+			$data['recent_activities'] = $this->Activity_model->get_recent_activities_except_super_admin() ?? [];
+			$data['total_agent'] = $this->User_model->count_all_agent() ?? 0;
+			$data['total_admin'] = $this->User_model->count_all_admin() ?? 0;
+			$data['total_orders'] = $this->Order_model->count_all_orders() ?? 0;
+		}
+		if ($code && $code === 'AGENT') {
+			$userId = $user->id ?? '';
+			$data['total_orders'] = $this->Order_model->count_orders_by_user_id($userId) ?? 0;
+			$data['today_orders'] = $this->Order_model->count_today_orders_by_user_id($userId) ?? 0;
+		}
 
-		// Flag info
-		echo "<script>console.log('Data dari cache flag: " . ($data['from_cache'] ? 'YA' : 'TIDAK') . "');</script>";
-		$this->load->view('base_page', ['data' => $data]);
+		echo "<script>console.log('Session di navbar:', " . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . ");</script>";
+
+		$this->load->view('base_page', $data);
 	}
 
+	// public function index()
+	// {
+	// 	$session = $this->check_token();
+	// 	if (!$session)
+	// 		return;
 
-	private function check_token()
-	{
-		$session = $this->session->userdata();
-		$token = isset($session['token']) ? $session['token'] : null;
+	// 	$user = $session['user'] ?? null;
+	// 	if (!$user)
+	// 		return $this->force_logout('Data pengguna tidak ditemukan.');
 
-		if ($token == '' || $token == null) {
-			$this->session->set_flashdata('swal', [
-				'title' => 'Gagal!',
-				'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
-				'icon' => 'error'
-			]);
-			redirect('login');
-			return;
-		}
+	// 	// Ambil ID role admin
+	// 	$admin_role_id = $this->db->select('id')->get_where('roles', ['code' => 'ADMIN'])->row('id') ?? 0;
 
-		$tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
-		if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
-			$this->session->unset_userdata(['token', 'user']);
-			$this->session->set_flashdata('swal', [
-				'title' => 'Gagal!',
-				'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
-				'icon' => 'error'
-			]);
-			redirect('login');
-			return;
-		}
+	// 	// $data = [
+	// 	// 	'session' => $session,
+	// 	// 	'page' => 'Dashboard',
+	// 	// ];
 
-		return $session;
-	}
+	// 	$data ['token'] = $session ['token'] ?? null;
+	// 	$data ['user'] = $user;
+
+	// 	// Cache key unik per user
+	// 	$cache_key = 'dashboard_' . strtolower($user->code) . '_' . $user->id;
+
+	// 	// Coba ambil dari cache
+	// 	$dashboard_data = $this->cache->get($cache_key);
+
+	// 	if ($dashboard_data === false) {
+	// 		log_message('debug', "Cache MISS → DB query untuk {$cache_key}");
+
+	// 		$dashboard_data = [];
+
+	// 		if ($user->code === 'SUPER_ADMIN') {
+	// 			$tz = new DateTimeZone('Asia/Jakarta');
+	// 			$dt = new DateTime('now', $tz);
+	// 			$dt->modify('-12 hours');
+
+	// 			$this->db->select('activity.*, users.username');
+	// 			$this->db->from('activity');
+	// 			$this->db->join('users', 'users.id = activity.user_id', 'left');
+	// 			$this->db->where('activity.created_at >=', $dt->format('Y-m-d H:i:s'));
+	// 			$this->db->order_by('activity.created_at', 'DESC');
+	// 			$dashboard_data['recent_activities'] = $this->db->get()->result_array();
+
+	// 			$dashboard_data['total_users'] = (int) $this->db->count_all('users');
+	// 			$dashboard_data['total_admin'] = (int) $this->db->where('role_id', $admin_role_id)->count_all_results('users');
+	// 			$dashboard_data['total_orders'] = (int) $this->db->count_all('orders');
+	// 		}
+
+	// 		if ($user->code === 'AGENT') {
+	// 			$username = $user->username;
+	// 			$today = (new DateTime('now', new DateTimeZone('Asia/Jakarta')))->format('Y-m-d');
+
+	// 			$dashboard_data['total_orders'] = (int) $this->db
+	// 				->where('created_by', $username)
+	// 				->count_all_results('orders');
+
+	// 			$dashboard_data['today_orders'] = (int) $this->db
+	// 				->where('created_by', $username)
+	// 				->where('DATE(created_at)', $today)
+	// 				->count_all_results('orders');
+	// 		}
+
+	// 		$dashboard_data['from_cache'] = false;
+
+	// 		// Simpan cache 24 jam
+	// 		$this->cache->save($cache_key, $dashboard_data, 86400);
+	// 	} else {
+	// 		$dashboard_data['from_cache'] = true;
+	// 		log_message('debug', "Cache HIT (key: {$cache_key})");
+	// 	}
+
+	// 	$data = array_merge($data, $dashboard_data);
+
+	// 	echo "<script>console.log('Session di navbar:', " . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . ");</script>";
+	// 	$this->load->view('base_page', $data);
+	// }
 
 	public function error_404()
 	{
@@ -122,10 +148,11 @@ class Welcome extends CI_Controller
 		if ($data === false) {
 			$data = ['time' => date('H:i:s')];
 			$this->cache->save($key, $data, 60);
-			echo "<script>console.log('Cache MISS. Simpan baru: " . json_encode($data) . "');</script>";
+			log_message('debug', 'Cache MISS: ' . json_encode($data));
 		} else {
-			echo "<script>console.log('Cache HIT. Data: " . json_encode($data) . "');</script>";
+			log_message('debug', 'Cache HIT: ' . json_encode($data));
 		}
-	}
 
+		echo json_encode($data);
+	}
 }

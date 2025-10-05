@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <meta name="author" content="Cex System" />
         <title>404 Error - Cex</title>
         <link rel="stylesheet" href="<?= base_url('assets/css/styles.css') ?>">
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="<?= base_url('assets/js/font-awesome-all.js') ?>" crossorigin="anonymous"></script>
     </head>
     <body class="bg-light">
         <div id="layoutError">
@@ -36,7 +36,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php $this->load->view('layout/footer'); ?>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="<?= base_url('assets/js/bootstrap.bundle.min.js') ?>" crossorigin="anonymous"></script>
         <script src="<?= base_url('assets/js/scripts.js') ?>"></script>
     </body>
 </html>

@@ -2,17 +2,28 @@
     footer {
         font-size: 0.85rem;
         box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.08);
+        background-color: #f8f9fa;
+        /* jaga konsistensi bg dengan class bg-light */
     }
 
     footer a {
         text-decoration: none;
-        color: #0d6efd;
-        transition: color 0.2s ease-in-out;
+        color: var(--bs-primary, #0d6efd);
+        /* lebih fleksibel */
+        transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
     }
 
     footer a:hover {
-        color: #0a58ca;
+        color: var(--bs-primary-hover, #0a58ca);
         text-decoration: underline;
+    }
+
+    @media (max-width: 576px) {
+        footer .d-flex {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
     }
 </style>
 

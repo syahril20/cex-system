@@ -1,0 +1,48 @@
+{
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[github-actions-workflow]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "yaml.schemas": {
+        "file:///c%3A/Users/Kyari/.vscode/extensions/atlassian.atlascode-3.8.20/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+    },
+    "files.autoSave": "afterDelay",
+    "workbench.iconTheme": "vscode-icons",
+    "[php]": {
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode"
+    },
+    "intelephense.phpdoc.propertyTemplate": {
+        "summary": "$1",
+        "tags": [
+            "$db",
+            "@var ${1:$SYMBOL_TYPE}"
+        ]
+    },
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+    },
+
+    // ✅ Tambahan untuk Intelephense & CodeIgniter
+    "intelephense.environment.includePaths": [
+        "application/controllers",
+        "application/models",
+        "application/libraries",
+        "application/helpers",
+        "system/core",
+        "system/database",
+        "system/libraries"
+    ],
+    "intelephense.environment.phpVersion": "7.4.33",
+    "intelephense.diagnostics.undefinedTypes": false,
+    "intelephense.diagnostics.undefinedFunctions": false,
+    "intelephense.diagnostics.undefinedConstants": false,
+    "editor.formatOnSave": true
+}

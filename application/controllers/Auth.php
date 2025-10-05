@@ -102,6 +102,8 @@ class Auth extends CI_Controller
 
 		// Simpan token di session
 		$this->session->set_userdata('token', $token);
+		// Hapus password sebelum set session
+		unset($user->password);
 		$this->session->set_userdata('user', $user);
 
 		$this->session->set_flashdata('swal', [

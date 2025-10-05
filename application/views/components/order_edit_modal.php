@@ -1,5 +1,5 @@
 <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="<?= base_url('assets/js/sweetalert2@11.js') ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         renderShipmentDetails();

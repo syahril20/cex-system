@@ -12,7 +12,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta name="author" content="" />
     <title>Register</title>
     <link rel="stylesheet" href="<?= base_url('assets/css/styles.css') ?>">
-    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="<?= base_url('assets/js/font-awesome-all.js') ?>" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-primary">
@@ -50,8 +50,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                         <div class="form-floating mb-3 mb-md-0">
                                             <select name=" role_id" class="form-select" required>
                                                 <?php foreach ($roles as $role): ?>
-                                                <option value="<?= $role->id ?>"><?= $role->name ?>
-                                                </option>
+                                                    <option value="<?= $role->id ?>"><?= $role->name ?>
+                                                    </option>
                                                 <?php endforeach; ?>
                                             </select><br><br>
                                             <label for="inputRole">Role</label>
@@ -90,7 +90,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </div>
 
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-            <?php if ($this->session->flashdata('error')): ?>
+        <?php if ($this->session->flashdata('error')): ?>
             <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
                 aria-atomic="true" data-bs-delay="5000">
                 <div class="d-flex">
@@ -101,19 +101,19 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         aria-label="Close"></button>
                 </div>
             </div>
-            <?php endif; ?>
-        </div>
+        <?php endif; ?>
+    </div>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-            toastElList.forEach(function(toastEl) {
+            toastElList.forEach(function (toastEl) {
                 new bootstrap.Toast(toastEl).show();
             });
         });
-        </script>
+    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
+    <script src="<?= base_url('assets/js/bootstrap.bundle.min.js') ?>" crossorigin="anonymous"></script>
     </script>
     <script src="<?= base_url('assets/js/scripts.js') ?>"></script>
 </body>

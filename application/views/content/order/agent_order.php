@@ -27,14 +27,6 @@
                                             <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tfoot class="table-light">
-                                        <tr>
-                                            <th>Airwaybill</th>
-                                            <th>Created At</th>
-                                            <th>Status</th>
-                                            <th class="text-center">Aksi</th>
-                                        </tr>
-                                    </tfoot>
                                     <tbody>
                                         <?php foreach ($orders as $o): ?>
                                             <tr>
@@ -112,7 +104,6 @@
     <?php $this->load->view('layout/footer'); ?>
 
     <!-- DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
-        crossorigin="anonymous"></script>
+    <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 </div>

@@ -1,6 +1,16 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 // use GuzzleHttp\Client;
+
+/**
+ * @property CI_Session $session
+ * @property CI_Input $input
+ * @property CI_Form_validation $form_validation
+ * @property CI_DB_query_builder $db
+ * @property Master_model $Master_model
+ * @property Order_model $Order_model
+ * @property Shipment_images_model $Shipment_images_model
+ */
 class Order extends CI_Controller
 {
     public function __construct()
@@ -10,7 +20,7 @@ class Order extends CI_Controller
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
         $this->load->helper(['activity', 'utils']);
-        $this->load->model('Master_model');
+        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model']);
 
         // $this->load->database(); // Uncomment if not autoloaded
     }
@@ -18,35 +28,31 @@ class Order extends CI_Controller
     public function index()
     {
         $session = check_token();
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
         $userId = $user->id;
 
         $orders = null;
         if ($user->code == 'AGENT') {
-            $this->db->order_by('created_at', 'DESC');
-            $query = $this->db->get_where('orders', ['user_id' => $userId]);
-            $orders = $query->num_rows() > 0 ? $query->result_array() : null;
+            $orders = $this->Order_model->get_orders_by_user_id($userId) ?? [];
 
             if ($orders) {
                 foreach ($orders as &$o) {
-                    $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
-                    $o['shipment_image'] = $shipment_image;
+                    $o['shipment_image'] = $this->Shipment_images_model->get_image_by_order_id($o['id']);
                 }
                 unset($o);
             }
-        }
-        if ($user->code == 'ADMIN' || $user->code == 'SUPER_ADMIN') {
-            $this->db->order_by('created_at', 'DESC');
-            $query = $this->db->get('orders');
-            $orders = $query->num_rows() > 0 ? $query->result_array() : null;
+        } elseif ($user->code == 'ADMIN' || $user->code == 'SUPER_ADMIN') {
+            $orders = $this->Order_model->get_all_orders() ?? [];
 
             if ($orders) {
                 foreach ($orders as &$o) {
-                    $shipment_image = $this->db->get_where('shipment_images', ['order_id' => $o['id']])->row_array();
-                    $o['shipment_image'] = $shipment_image;
+                    $o['shipment_image'] = $this->Shipment_images_model->get_image_by_order_id($o['id']) ?? null;
                 }
                 unset($o);
             }
+        } else {
+            redirect('/');
         }
 
         if ($orders) {
@@ -77,36 +83,46 @@ class Order extends CI_Controller
             unset($order);
         }
 
-        $data['session'] = $session;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
 
-        $this->load->view('base_page', ['data' => $data]);
+        $this->load->view('base_page', $data);
     }
 
     public function order_form()
     {
         $session = check_token();
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
-        $data['session'] = $session;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['page'] = 'OrderForm';
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
 
-        if ($user->code == 'SUPER_ADMIN') {
-            $this->load->view('superadmin/superadmin_dashboard');
-        }
-        if ($user->code == 'ADMIN') {
-            $this->load->view('admin/admin_dashboard');
-        }
-        if ($user->code == 'AGENT') {
-            $this->load->view('base_page', ['data' => $data]);
+        if ($user->code !== 'SUPER_ADMIN') {
+            $this->load->view('base_page', $data);
         }
     }
 
     public function create()
     {
+        $session = check_token();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
+
+        if ($user->code == 'SUPER_ADMIN') {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Hanya AGENT dan ADMIN yang dapat membuat order',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
+        }
         $data = $this->input->post();
 
         $this->form_validation->set_rules('ship_name', 'Shipper Name', 'required');
@@ -204,17 +220,15 @@ class Order extends CI_Controller
     public function detail($orderId)
     {
         $session = check_token();
-
-        $user = $session['user'];
-        if ($user->code == 'AGENT') {
-            $order = $this->db->get_where('orders', [
-                'id' => $orderId,
-                'user_id' => $user->id
-            ])->row();
-        } else {
-            $order = $this->db->get_where('orders', [
-                'id' => $orderId
-            ])->row();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
+        switch ($user->code) {
+            case 'AGENT':
+                $order = $this->Order_model->get_order_by_id_and_user($orderId, $user->id);
+                break;
+            default:
+                $order = $this->Order_model->get_order_by_id($orderId);
+                break;
         }
         if (!$order) {
             $this->session->set_flashdata('swal', [
@@ -226,24 +240,20 @@ class Order extends CI_Controller
             return;
         }
 
-        // $orderItems = $this->db->get_where('order_items', ['order_id' => $orderId])->result();
-
-        $data['session'] = $session;
-        $data['order'] = $order;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['page'] = 'OrderDetail';
+        $data['order'] = $order;
 
-        $this->load->view('base_page', ['data' => $data]);
+        $this->load->view('base_page', $data);
     }
 
     public function upload_form($orderId)
     {
         $session = check_token();
-
-        $user = $session['user'];
-        $order = $this->db->get_where('orders', [
-            'id' => $orderId,
-            'user_id' => $user->id
-        ])->row();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
+        $order = $this->Order_model->get_order_by_id_and_user($orderId, $user->id);
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -253,11 +263,12 @@ class Order extends CI_Controller
             redirect('/order');
         }
 
-        $data['session'] = $session;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['order'] = $order;
         $data['page'] = 'UploadForm';
 
-        $this->load->view('base_page', ['data' => $data]);
+        $this->load->view('base_page', $data);
     }
 
     public function do_upload()
@@ -410,36 +421,6 @@ class Order extends CI_Controller
         redirect('order');
     }
 
-    // private function check_token()
-    // {
-    //     $session = $this->session->userdata();
-    //     $token = isset($session['token']) ? $session['token'] : null;
-
-    //     if ($token == '' || $token == null) {
-    //         redirect('login');
-    //         $this->session->set_flashdata('swal', [
-    //             'title' => 'Gagal!',
-    //             'text' => 'Session tidak ditemukan.',
-    //             'icon' => 'error'
-    //         ]);
-    //         return;
-    //     }
-
-    //     $tokendb = $this->db->get_where('user_tokens', ['token' => $token])->row();
-    //     if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
-    //         $this->session->unset_userdata(['token', 'user']);
-    //         $this->session->set_flashdata('swal', [
-    //             'title' => 'Gagal!',
-    //             'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
-    //             'icon' => 'error'
-    //         ]);
-    //         redirect('login');
-    //         return;
-    //     }
-
-    //     return $session;
-    // }
-
     public function test_guzzle()
     {
         $client = new \GuzzleHttp\Client();
@@ -452,7 +433,8 @@ class Order extends CI_Controller
     public function edit($orderId)
     {
         $session = check_token();
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
         // Hanya ADMIN dan SUPER_ADMIN yang boleh edit
         if (!in_array($user->code, ['ADMIN', 'SUPER_ADMIN'])) {
@@ -465,7 +447,7 @@ class Order extends CI_Controller
             return;
         }
 
-        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        $order = $this->Order_model->get_order_by_id($orderId);
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -479,14 +461,15 @@ class Order extends CI_Controller
         // Ambil data payload lama untuk form
         $order_data = json_decode($order->data, true);
 
-        $data['session'] = $session;
+        $data['token'] = $token;
+        $data['user'] = $user;
         $data['order'] = $order;
         $data['order_data'] = $order_data;
         $data['page'] = 'OrderEdit';
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
 
-        $this->load->view('base_page', ['data' => $data]);
+        $this->load->view('base_page', $data);
     }
 
     public function do_edit($orderId)

@@ -1,21 +1,37 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Roles extends CI_Controller
+/**
+ * @property Role_model $Role_model
+ * @property CI_Session $session
+ * @property CI_Input $input
+ * @property CI_Form_validation $form_validation
+ */
+class Role extends CI_Controller
 {
 
     public function __construct()
     {
         parent::__construct();
         $this->load->model('Role_model');
-        $this->load->helper(array('form', 'url'));
+        $this->load->helper(array('form', 'url', 'utils'));
         $this->load->library('form_validation');
     }
 
     public function index()
     {
+        $session = check_token();
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
+
+        $data['token'] = $token;
+        $data['user'] = $user;
+        $data['page'] = 'Role';
         $data['roles'] = $this->Role_model->get_all_roles();
-        $this->load->view('roles/index', $data);
+
+        echo "<script>console.log('Roles Data:', " . json_encode($data) . ");</script>";
+        
+        $this->load->view('base_page', $data);
     }
 
     public function create()

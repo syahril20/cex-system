@@ -152,7 +152,7 @@
     <?php $this->load->view('layout/footer'); ?>
 
     <!-- DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const table = document.getElementById("datatablesSimple");

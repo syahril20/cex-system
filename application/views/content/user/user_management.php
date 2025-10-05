@@ -16,33 +16,22 @@
                 </div>
 
                 <div class="card-body">
-                    <?php if ($this->session->userdata('user')->code === 'SUPER_ADMIN'): ?>
-                        <div class="table-responsive">
-                            <table id="datatablesSimple" class="table table-bordered table-hover align-middle w-100">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Updated At</th>
-                                        <th>Updated By</th>
-                                        <th>Disabled At</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tfoot class="table-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Updated At</th>
-                                        <th>Updated By</th>
-                                        <th>Disabled At</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </tfoot>
-                                <tbody>
-                                    <?php if (!empty($users)): ?>
+                    <?php if ($user->code === 'SUPER_ADMIN' || $user->code === 'ADMIN'): ?>
+                        <?php if (!empty($users)): ?>
+                            <div class="table-responsive">
+                                <table id="datatablesSimple" class="table table-bordered table-hover align-middle w-100">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Updated At</th>
+                                            <th>Updated By</th>
+                                            <th>Disabled At</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         <?php foreach ($users as $o): ?>
                                             <tr>
                                                 <td><strong><?= htmlspecialchars($o['username']) ?></strong></td>
@@ -77,14 +66,14 @@
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted">Belum ada user</td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i> Belum ada aktivitas yang tercatat.
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -93,8 +82,7 @@
 
     <?php $this->load->view('layout/footer'); ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
-        crossorigin="anonymous"></script>
+    <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 
     <?php $this->load->view('components/user_activation_modal'); ?>

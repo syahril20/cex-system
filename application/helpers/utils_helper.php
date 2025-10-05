@@ -20,28 +20,16 @@ if (!function_exists('check_token')) {
     {
         $CI =& get_instance();
         $session = $CI->session->userdata();
-        $token = isset($session['token']) ? $session['token'] : null;
+        $token = $session['token'] ?? null;
 
-        if ($token == '' || $token == null) {
-            $CI->session->set_flashdata('swal', [
-                'title' => 'Gagal!',
-                'text' => 'Session tidak ditemukan.',
-                'icon' => 'error'
-            ]);
-            redirect('login');
-            return;
+        if (empty($token)) {
+            return force_logout('Token tidak ditemukan.');
         }
 
         $tokendb = $CI->db->get_where('user_tokens', ['token' => $token])->row();
+
         if (!$tokendb || strtotime($tokendb->expired_at) < time()) {
-            $CI->session->unset_userdata(['token', 'user']);
-            $CI->session->set_flashdata('swal', [
-                'title' => 'Gagal!',
-                'text' => 'Session telah kedaluwarsa. Silakan login kembali.',
-                'icon' => 'error'
-            ]);
-            redirect('login');
-            return;
+            return force_logout('Session telah kedaluwarsa. Silakan login kembali.');
         }
 
         return $session;
@@ -109,5 +97,18 @@ if (!function_exists('check_token')) {
         $data['connote_reff'] = htmlspecialchars(trim($data['connote_reff'] ?? '-'));
 
         return ['status' => true, 'data' => $data, 'message' => 'Valid'];
+    }
+
+    function force_logout($message)
+    {
+        $CI =& get_instance();
+        $CI->session->unset_userdata(['token', 'user']);
+        $CI->session->set_flashdata('swal', [
+            'title' => 'Gagal!',
+            'text' => $message,
+            'icon' => 'error'
+        ]);
+        redirect('login');
+        return;
     }
 }

@@ -62,7 +62,6 @@
                     </a>
 
                     <?php
-                    $user = $session['user'];
                     $username = $user->username;
                     $code = $user->code;
                     ?>
@@ -77,9 +76,9 @@
                             User
                         </a>
 
-                        <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
+                        <a class="nav-link <?= ($page == 'Role') ? 'active' : '' ?>" href="<?= site_url('/role') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-tag"></i></div>
-                            Roles
+                            Role
                         </a>
 
                         <a class="nav-link <?= in_array($page, ['Order', 'OrderEdit', 'OrderDetail']) ? 'active' : '' ?>"
@@ -97,11 +96,6 @@
                             href="<?= site_url('/user') ?>">
                             <div class="sb-nav-link-icon"><i class="fa-solid fa-user-gear"></i></div>
                             User
-                        </a>
-
-                        <a class="nav-link <?= ($page == 'Roles') ? 'active' : '' ?>" href="<?= site_url('/roles') ?>">
-                            <div class="sb-nav-link-icon"><i class="fa-solid fa-user-lock"></i></div>
-                            Roles
                         </a>
 
                         <a class="nav-link <?= in_array($page, ['Order', 'OrderEdit', 'OrderDetail']) ? 'active' : '' ?>"
@@ -138,36 +132,30 @@
     if (!empty($page)) {
         switch ($page) {
             case 'Dashboard':
+                $this->load->view('dashboard/index');
+                break;
+
+            case 'Role':
                 if ($code === 'SUPER_ADMIN')
-                    $this->load->view('content/dashboard/superadmin_dashboard');
-                if ($code === 'ADMIN')
-                    $this->load->view('content/dashboard/admin_dashboard');
-                if ($code === 'AGENT')
-                    $this->load->view('content/dashboard/agent_dashboard');
+                    $this->load->view('role/index');
                 break;
 
             case 'Order':
-                if ($code === 'SUPER_ADMIN')
-                    $this->load->view('content/order/superadmin_order');
-                if ($code === 'AGENT')
-                    $this->load->view('content/order/agent_order');
+                $this->load->view('order/index');
                 break;
 
             case 'OrderForm':
                 if ($code === 'AGENT')
-                    $this->load->view('content/order/agent_order_form');
+                    $this->load->view('order/create');
                 break;
 
             case 'OrderDetail':
-                if ($code === 'SUPER_ADMIN')
-                    $this->load->view('content/order/superadmin_order_detail');
-                if ($code === 'AGENT')
-                    $this->load->view('content/order/agent_order_detail');
+                $this->load->view('order/detail');
                 break;
 
             case 'OrderEdit':
-                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                    $this->load->view('content/order/admin_order_edit');
+                if ($code !== 'AGENT') {
+                    $this->load->view('order/edit');
                 }
                 break;
 

@@ -67,8 +67,7 @@
     <?php $this->load->view('layout/footer'); ?>
 
     <!-- DataTables -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
-        crossorigin="anonymous"></script>
+    <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/datatables-simple-demo.js') ?>"></script>
 
     <?php $this->load->view('components/user_edit_modal'); ?>

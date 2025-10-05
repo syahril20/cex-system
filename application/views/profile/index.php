@@ -16,13 +16,13 @@
                             <div class="mb-3">
                                 <i class="fas fa-user-circle text-secondary" style="font-size:5rem;"></i>
                             </div>
-                            <h4 class="fw-bold mb-1"><?= htmlspecialchars($session['user']->username) ?></h4>
-                            <p class="text-muted mb-2"><?= htmlspecialchars($session['user']->email) ?></p>
-                            <span class="badge bg-primary"><?= htmlspecialchars($session['user']->code) ?></span>
+                            <h4 class="fw-bold mb-1"><?= htmlspecialchars($user->username) ?></h4>
+                            <p class="text-muted mb-2"><?= htmlspecialchars($user->email) ?></p>
+                            <span class="badge bg-primary"><?= htmlspecialchars($user->code) ?></span>
                         </div>
                         <div class="card-footer text-center">
                             <small class="text-muted">
-                                Dibuat: <?= htmlspecialchars($session['user']->created_at ?? '-') ?>
+                                Dibuat: <?= htmlspecialchars($user->created_at ?? '-') ?>
                             </small>
                         </div>
                     </div>
@@ -39,26 +39,26 @@
                                 <tbody>
                                     <tr>
                                         <th class="bg-light" style="width: 30%;">Username</th>
-                                        <td><?= htmlspecialchars($session['user']->username) ?></td>
+                                        <td><?= htmlspecialchars($user->username) ?></td>
                                     </tr>
                                     <tr>
                                         <th class="bg-light">Email</th>
-                                        <td><?= htmlspecialchars($session['user']->email) ?></td>
+                                        <td><?= htmlspecialchars($user->email) ?></td>
                                     </tr>
                                     <tr>
                                         <th class="bg-light">Role</th>
-                                        <td><?= htmlspecialchars($session['user']->code) ?></td>
+                                        <td><?= htmlspecialchars($user->code) ?></td>
                                     </tr>
                                     <tr>
                                         <th class="bg-light">Dibuat Oleh</th>
-                                        <td><?= !empty($session['user']->created_by) ? htmlspecialchars($session['user']->created_by) : 'system' ?>
+                                        <td><?= !empty($user->created_by) ? htmlspecialchars($user->created_by) : 'system' ?>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="bg-light">Terakhir Diperbarui</th>
-                                        <td><?= htmlspecialchars($session['user']->updated_at ?? '-') ?></td>
+                                        <td><?= htmlspecialchars($user->updated_at ?? '-') ?></td>
                                     </tr>
-                                    <?php if ($session['user']->code === 'AGENT'): ?>
+                                    <?php if ($user->code === 'AGENT'): ?>
                                         <tr>
                                             <th class="bg-light">Saldo</th>
                                             <td><strong>Rp <?= number_format($saldo ?? 0, 0, ',', '.') ?></strong></td>
