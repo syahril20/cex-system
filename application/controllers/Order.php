@@ -10,6 +10,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property Master_model $Master_model
  * @property Order_model $Order_model
  * @property Shipment_images_model $Shipment_images_model
+ * @property Country_data_model $Country_data_model
  */
 class Order extends CI_Controller
 {
@@ -20,7 +21,7 @@ class Order extends CI_Controller
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
         $this->load->helper(['activity', 'utils']);
-        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model']);
+        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model']);
 
         // $this->load->database(); // Uncomment if not autoloaded
     }
@@ -244,6 +245,9 @@ class Order extends CI_Controller
         $data['user'] = $user;
         $data['page'] = 'OrderDetail';
         $data['order'] = $order;
+        $data['rates'] = $this->Master_model->get_rates();
+
+        echo '<script>console.log(' . json_encode($data) . ');</script>';
 
         $this->load->view('base_page', $data);
     }
@@ -332,10 +336,7 @@ class Order extends CI_Controller
             // Simpan ke DB
             // Cek apakah sudah ada data dengan order_id dan airwaybill yang sama
             $order_id = $this->input->post('order_id');
-            $existing = $this->db->get_where('shipment_images', [
-                'order_id' => $order_id,
-                'airwaybill' => $airwaybill
-            ])->result();
+            $existing = $this->Order_model->get_shipment_images_by_order_and_airwaybill($order_id, $airwaybill);
 
             // Hapus data lama dan file-nya jika ada
             foreach ($existing as $row) {
@@ -468,6 +469,9 @@ class Order extends CI_Controller
         $data['page'] = 'OrderEdit';
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
+        $data['country_data'] = $this->Country_data_model->get_all();
+
+        echo '<script>console.log(' . json_encode($data) . ');</script>';
 
         $this->load->view('base_page', $data);
     }
@@ -475,7 +479,8 @@ class Order extends CI_Controller
     public function do_edit($orderId)
     {
         $session = check_token();
-        $user = $session['user'];
+        $token = $session['token'] ?? null;
+        $user = $session['user'] ?? null;
 
         // Hanya ADMIN dan SUPER_ADMIN yang boleh edit
         if (!in_array($user->code, ['ADMIN', 'SUPER_ADMIN'])) {
@@ -488,7 +493,7 @@ class Order extends CI_Controller
             return;
         }
 
-        $order = $this->db->get_where('orders', ['id' => $orderId])->row();
+        $order = $this->Order_model->get_order_by_id($orderId);
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -554,17 +559,7 @@ class Order extends CI_Controller
             return;
         }
 
-        // Ambil data payload lama untuk form
-        $order_data = json_decode($order->data, true);
-
-        $data['session'] = $session;
-        $data['order'] = $order;
-        $data['order_data'] = $order_data;
-        $data['page'] = 'OrderEdit';
-        $data['rates'] = $this->Master_model->get_rates();
-        $data['commodities'] = $this->Master_model->get_commodity();
-
-        $this->load->view('base_page', ['data' => $data]);
+        redirect('/order');
     }
 
     public function tracking()
@@ -601,7 +596,7 @@ class Order extends CI_Controller
             return;
         }
 
-        $order = $this->db->get_where('orders', ['id' => $id])->row();
+        $order = $this->Order_model->get_order_by_id($id);
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -647,7 +642,7 @@ class Order extends CI_Controller
             return;
         }
 
-        $order = $this->db->get_where('orders', ['id' => $id])->row();
+        $order = $this->Order_model->get_order_by_id($id);
         if (!$order) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',

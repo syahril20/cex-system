@@ -56,4 +56,12 @@ class Order_model extends CI_Model
             'id' => $orderId
         ])->row();
     }
+
+    public function get_shipment_images_by_order_and_airwaybill($order_id, $airwaybill)
+    {
+        return $this->db->get_where('shipment_images', [
+            'order_id' => $order_id,
+            'airwaybill' => $airwaybill
+        ])->result();
+    }
 }

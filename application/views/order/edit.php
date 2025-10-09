@@ -59,14 +59,47 @@
                                 'is_connote_reff',
                                 'connote_reff'
                             ];
-                            foreach ($jsonFields as $field): ?>
-                                <div class="col-md-6">
-                                    <label
-                                        class="form-label fw-semibold small"><?= ucwords(str_replace('_', ' ', $field)) ?></label>
-                                    <input type="text" class="form-control" name="data[<?= $field ?>]"
-                                        value="<?= htmlspecialchars($order_data[$field] ?? '') ?>">
-                                </div>
-                            <?php endforeach; ?>
+
+                            foreach ($jsonFields as $field):
+                                // Jika field adalah rec_country
+                                if ($field === 'rec_country'): ?>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">
+                                            <?= ucwords(str_replace('_', ' ', $field)) ?>
+                                        </label>
+                                        <select class="form-select" name="data[<?= $field ?>]" id="rec_country">
+                                            <option value="">-- Select Country --</option>
+                                            <?php foreach ($country_data as $c): ?>
+                                                <option value="<?= htmlspecialchars($c['country_name']) ?>"
+                                                    data-code="<?= htmlspecialchars($c['code2']) ?>" <?= ($order_data['rec_country'] ?? '') === $c['country_name'] ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($c['country_name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+
+                                    <?php
+                                    // Jika field adalah rec_country_code
+                                elseif ($field === 'rec_country_code'): ?>
+                                    <div class="col-md-6">
+                                        <label
+                                            class="form-label fw-semibold small"><?= ucwords(str_replace('_', ' ', $field)) ?></label>
+                                        <input type="text" class="form-control" name="data[<?= $field ?>]" id="rec_country_code"
+                                            value="<?= htmlspecialchars($order_data[$field] ?? '') ?>" disabled>
+                                    </div>
+
+                                    <?php
+                                    // Field lainnya tetap input biasa
+                                else: ?>
+                                    <div class="col-md-6">
+                                        <label
+                                            class="form-label fw-semibold small"><?= ucwords(str_replace('_', ' ', $field)) ?></label>
+                                        <input type="text" class="form-control" name="data[<?= $field ?>]"
+                                            value="<?= htmlspecialchars($order_data[$field] ?? '') ?>">
+                                    </div>
+                                <?php endif;
+                            endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -119,6 +152,18 @@
         </div>
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectCountry = document.getElementById('rec_country');
+            const inputCode = document.getElementById('rec_country_code');
+
+            selectCountry.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const code = selectedOption.getAttribute('data-code') || '';
+                inputCode.value = code;
+            });
+        });
+    </script>
     <?php $this->load->view('layout/footer'); ?>
     <?php $this->load->view('components/order_edit_script'); ?>
     <?php $this->load->view('components/order_edit_modal'); ?>

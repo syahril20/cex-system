@@ -145,7 +145,7 @@
                 break;
 
             case 'OrderForm':
-                if ($code === 'AGENT')
+                if ($code !== 'SUPER_ADMIN')
                     $this->load->view('order/create');
                 break;
 
@@ -160,25 +160,25 @@
                 break;
 
             case 'UploadForm':
-                if ($code === 'AGENT')
-                    $this->load->view('content/order/agent_upload_form');
+                if ($code !== 'SUPER_ADMIN')
+                    $this->load->view('order/upload');
                 break;
 
             case 'UserManagement':
-                if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                    $this->load->view('content/user/user_management');
+                if ($code !== 'AGENT') {
+                    $this->load->view('user/user_management');
                 }
                 break;
 
             case 'UserEdit':
                 if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                    $this->load->view('content/user/user_edit');
+                    $this->load->view('user/user_edit');
                 }
                 break;
 
             case 'UserCreate':
                 if ($code === 'SUPER_ADMIN' || $code === 'ADMIN') {
-                    $this->load->view('content/user/user_create');
+                    $this->load->view('user/user_create');
                 }
                 break;
 

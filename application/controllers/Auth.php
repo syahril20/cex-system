@@ -4,7 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /**
  * (No code provided in the selection.)
  * @property CI_Session $session
- * @property CI_DB_active_record $db
+ * @property CI_DB_query_builder $db
  * @property User_model $User_model
  * @property JwtAuth $jwtauth
  * @property CI_Input $input

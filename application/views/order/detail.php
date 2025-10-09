@@ -37,7 +37,6 @@
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-bordered table-sm table-striped mb-0">
-
                             <tr>
                                 <th>Airwaybill</th>
                                 <td><?= htmlspecialchars($order['airwaybill']) ?></td>
@@ -86,7 +85,6 @@
                                 <th>Updated By</th>
                                 <td><?= htmlspecialchars($order['updated_by'] ?? '-') ?></td>
                             </tr>
-
                         </table>
                     </div>
                 </div>
@@ -102,6 +100,7 @@
                             $data = json_decode($order['data'], true);
                             if (is_array($data)):
                                 foreach ($data as $key => $value):
+                                    // Shipment details (accordion)
                                     if ($key === 'shipment_details' && is_array($value)): ?>
                                         <tr>
                                             <th style="width:180px;">Shipment Details</th>
@@ -142,7 +141,51 @@
                                     <?php else: ?>
                                         <tr>
                                             <th style="width:180px;"><?= ucwords(str_replace('_', ' ', $key)) ?></th>
-                                            <td><?= htmlspecialchars($value) ?></td>
+                                            <td>
+                                                <?php
+                                                // === FIX: tampilkan nama service_type dari $rates['rate_type'] ===
+                                                if ($key === 'service_type') {
+                                                    $rateText = '';
+                                                    $badgeClass = 'bg-secondary';
+
+                                                    if (!empty($rates) && is_array($rates)) {
+                                                        foreach ($rates as $rate) {
+                                                            $rateType = $rate['rate_type'] ?? null;
+                                                            $rateTextVal = $rate['text'] ?? null;
+
+                                                            if ((string) $rateType === (string) $value) {
+                                                                $rateText = $rateTextVal;
+                                                                // Warna badge berdasarkan tipe
+                                                                switch (strtolower($rateText)) {
+                                                                    case 'reguler':
+                                                                        $badgeClass = 'bg-secondary';
+                                                                        break;
+                                                                    case 'express':
+                                                                        $badgeClass = 'bg-info text-dark';
+                                                                        break;
+                                                                    case 'special':
+                                                                        $badgeClass = 'bg-success';
+                                                                        break;
+                                                                    case 'promo':
+                                                                        $badgeClass = 'bg-warning text-dark';
+                                                                        break;
+                                                                    default:
+                                                                        $badgeClass = 'bg-light text-dark';
+                                                                        break;
+                                                                }
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
+                                                    // tampilkan hasil
+                                                    echo '<span class="badge ' . $badgeClass . '">' . htmlspecialchars($rateText ?: $value) . '</span>';
+
+                                                } else {
+                                                    echo htmlspecialchars($value);
+                                                }
+                                                ?>
+                                            </td>
                                         </tr>
                                     <?php endif;
                                 endforeach;
@@ -199,7 +242,6 @@
                                 </div>
                             <?php endif; ?>
                         </div>
-
                     </div>
                 </div>
 
@@ -208,6 +250,7 @@
             <?php endif; ?>
         </div>
     </main>
+
     <?php $this->load->view('components/modal_image_preview'); ?>
     <?php $this->load->view('layout/footer'); ?>
 </div>

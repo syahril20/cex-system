@@ -1,16 +1,98 @@
+<style>
+    /* Font kecil untuk tabel */
+    .table.table-sm td,
+    .table.table-sm th {
+        font-size: 0.85rem;
+        padding: 0.45rem 0.5rem;
+    }
+
+    /* Header tabel */
+    .table thead th {
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    /* Lebar kolom umum */
+    th:nth-child(1),
+    td:nth-child(1) {
+        width: 120px;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+        width: 200px;
+    }
+
+    th:nth-child(7),
+    td:nth-child(7) {
+        width: 180px;
+    }
+
+    /* Badge status */
+    .badge-status {
+        white-space: normal;
+        word-break: break-word;
+        max-width: 200px;
+        font-size: 0.75rem;
+        padding: 0.35em 0.6em;
+    }
+
+    /* Tombol aksi kecil & stabil */
+    .table td .btn-sm {
+        min-width: 70px;
+        white-space: nowrap;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.35rem;
+        transition: none !important;
+    }
+
+    /* Ikon tombol */
+    .table td .btn-sm i {
+        margin-right: 3px;
+        font-size: 0.75rem;
+    }
+
+    /* Kolom aksi — fleksibel horizontal (AGENT) */
+    #roleTable .action-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+        flex-wrap: nowrap;
+    }
+
+    /* Pastikan isi tengah & stabil */
+    .table td.text-center {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* Kolom aksi agent lebih kecil */
+    #roleTable th:last-child,
+    #roleTable td:last-child {
+        width: 130px !important;
+    }
+
+    /* Responsif di layar kecil */
+    @media (max-width: 576px) {
+        #roleTable .action-buttons {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
             <h1 class="mt-4 mb-4">
-                <i class="fa-solid fa-user-tag me-2 text-primary"></i>
                 Data Role
             </h1>
 
             <div class="card shadow-sm mb-4">
                 <div
                     class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
-                    <div class="fw-semibold">
-                        <i class="fa-solid fa-table me-1"></i> Data Role Table
+                    <div class="mb-2 mb-sm-0">
+                        Data Role Table
                     </div>
                     <a href="<?= site_url('role/create') ?>" class="btn btn-light btn-sm">
                         <i class="fas fa-plus"></i> Add New Role
@@ -21,8 +103,7 @@
                     <?php if ($user->code === 'SUPER_ADMIN'): ?>
                         <?php if (!empty($roles)): ?>
                             <div class="table-responsive">
-                                <table id="datatablesSimple"
-                                    class="table table-bordered table-hover table-striped align-middle w-100">
+                                <table id="roleTable" class="table table-bordered table-hover table-sm align-middle">
                                     <thead class="table-light">
                                         <tr class="text-center">
                                             <th>Name</th>
@@ -32,7 +113,7 @@
                                             <th>Created By</th>
                                             <th>Updated At</th>
                                             <th>Updated By</th>
-                                            <th class="aksi-column">Aksi</th>
+                                            <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -45,16 +126,16 @@
                                                 <td><?= htmlspecialchars($o['created_by']) ?></td>
                                                 <td><?= htmlspecialchars($o['updated_at']) ?></td>
                                                 <td><?= htmlspecialchars($o['updated_by']) ?></td>
-                                                <td class="text-center aksi-column">
-                                                    <div class="d-flex justify-content-center gap-2 flex-nowrap">
+                                                <td class="text-center">
+                                                    <div class="action-buttons">
                                                         <a href="<?= site_url('role/edit/' . $o['id']) ?>"
-                                                            class="btn btn-sm btn-warning" title="Edit Role">
-                                                            <i class="fas fa-edit"></i>
+                                                            class="btn btn-sm btn-primary" title="Edit Role">
+                                                            <i class="fas fa-edit fa-sm me-1"></i>Edit
                                                         </a>
                                                         <button type="button" class="btn btn-sm btn-danger"
                                                             onclick="swalDelete('<?= site_url('role/delete/' . $o['id']) ?>')"
                                                             title="Delete Role">
-                                                            <i class="fas fa-trash-alt"></i>
+                                                            <i class="fas fa-trash-alt"></i>Delete
                                                         </button>
                                                     </div>
                                                 </td>
@@ -79,60 +160,7 @@
     </main>
 
     <?php $this->load->view('layout/footer'); ?>
-
-    <!-- JS -->
-    <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const table = document.getElementById("datatablesSimple");
-            if (table) {
-                new simpleDatatables.DataTable(table, {
-                    searchable: true,
-                    fixedHeight: true
-                });
-            }
-        });
-
-        function swalDelete(url) {
-            Swal.fire({
-                title: 'Hapus Role?',
-                text: "Apakah Anda yakin ingin menghapus role ini?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = url;
-                }
-            });
-        }
-    </script>
-
-    <!-- ✅ Tambahkan CSS fix kolom aksi -->
-    <style>
-        /* Kolom aksi tetap lebar fix */
-        .aksi-column {
-            min-width: 120px !important;
-            max-width: 120px !important;
-            white-space: nowrap;
-            /* supaya tombol tidak turun */
-        }
-
-        /* Jika layar kecil, tombol tetap sejajar (tidak tumpuk) */
-        @media (max-width: 576px) {
-            .aksi-column {
-                min-width: 100px !important;
-            }
-
-            .aksi-column .btn {
-                padding: 0.25rem 0.4rem;
-                font-size: 0.8rem;
-            }
-        }
-    </style>
+    <?php $this->load->view('components/role_script'); ?>
 
     <?php $this->load->view('components/user_activation_modal'); ?>
 </div>

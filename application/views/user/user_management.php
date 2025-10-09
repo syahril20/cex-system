@@ -1,3 +1,21 @@
+<style>
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+        flex-wrap: nowrap;
+    }
+
+    .table td .btn-sm {
+        min-width: 70px;
+        white-space: nowrap;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.35rem;
+        transition: none !important;
+    }
+</style>
+
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
@@ -49,7 +67,7 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                    <div class="action-buttons">
                                                         <!-- Tombol Edit -->
                                                         <a href="<?= site_url('user/edit/' . $o['id']) ?>"
                                                             class="btn btn-sm btn-primary">
