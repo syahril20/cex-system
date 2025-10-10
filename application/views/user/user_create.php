@@ -30,7 +30,8 @@
                         <!-- Password -->
                         <div class="mb-3">
                             <label for="password" class="form-label fw-bold">Password</label>
-                            <input type="password" class="form-control shadow-sm" id="password" name="password" required>
+                            <input type="password" class="form-control shadow-sm" id="password" name="password"
+                                required>
                         </div>
 
                         <!-- Role -->
@@ -39,7 +40,7 @@
                             <select class="form-select shadow-sm" id="role" name="role_id" required>
                                 <option value="">Pilih Role</option>
                                 <?php foreach ($roles as $role): ?>
-                                    <option value="<?= $role->id ?>"><?= htmlspecialchars($role->name) ?></option>
+                                    <option value="<?= $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

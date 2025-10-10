@@ -17,7 +17,9 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Shipper Phone</label>
-                            <input type="text" name="ship_phone" class="form-control" required>
+                            <input type="text" name="ship_phone" class="form-control" required pattern="[0-9]+"
+                                title="Only numbers are allowed" inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">Shipper Address</label>
@@ -38,7 +40,9 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Receiver Phone</label>
-                            <input type="text" name="rec_phone" class="form-control">
+                            <input type="text" name="rec_phone" class="form-control" pattern="[0-9]+"
+                                title="Only numbers are allowed" inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">Receiver Address</label>
@@ -46,7 +50,9 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Postcode</label>
-                            <input type="text" name="rec_postcode" value="00000" class="form-control">
+                            <input type="text" name="rec_postcode" value="00000" class="form-control" required
+                                pattern="[0-9]+" title="Only numbers are allowed" inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">City</label>
@@ -54,12 +60,18 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Country</label>
-                            <input type="text" name="rec_country" value="United Arab Emirates" class="form-control">
+                            <select id="rec_country" name="rec_country" class="form-control">
+                                <option value="">-- Select Country --</option>
+                                <?php foreach ($country_data as $country): ?>
+                                    <option value="<?= htmlspecialchars($country['country_name']) ?>"
+                                        data-code="<?= htmlspecialchars($country['code2']) ?>">
+                                        <?= htmlspecialchars($country['country_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Country Code</label>
-                            <input type="text" name="rec_country_code" value="AE" class="form-control">
-                        </div>
+                        <input type="hidden" id="rec_country_code" name="rec_country_code" value="AE">
+
                     </div>
                 </div>
 
@@ -71,7 +83,9 @@
                     <div class="card-body row g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Weight (kg)</label>
-                            <input type="number" name="berat" value="1" step="0.01" class="form-control">
+                            <input type="number" name="berat" value="1" step="0.01" class="form-control" required
+                                pattern="[0-9]+([.][0-9]+)?" title="Only numbers are allowed" inputmode="decimal"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">ARC No</label>
@@ -79,11 +93,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Total Qty</label>
-                            <input type="number" name="total_qty" value="1" class="form-control">
+                            <input type="number" name="total_qty" value="1" class="form-control" required
+                                pattern="[0-9]+" title="Only numbers are allowed" inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Total Value</label>
-                            <input type="number" name="total_value" value="10" class="form-control">
+                            <input type="number" name="total_value" value="10" class="form-control" required
+                                pattern="[0-9]+([.][0-9]+)?" title="Only numbers are allowed" inputmode="decimal"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Goods Category</label>
@@ -104,14 +122,15 @@
                                 <?php if (!empty($rates)): ?>
                                     <?php foreach ($rates as $rate): ?>
                                         <option value="<?= htmlspecialchars($rate['id']) ?>">
-                                            <?= htmlspecialchars($rate['text']) ?></option>
+                                            <?= htmlspecialchars($rate['text']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Height</label>
-                            <input type="number" name="height" value="10" class="form-control">
+                            <input type="number" name="height" value="15.5" step="0.1" class="form-control">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Width</label>
@@ -164,7 +183,8 @@
                                             <?php if (!empty($commodities)): ?>
                                                 <?php foreach ($commodities as $commodity): ?>
                                                     <option value="<?= htmlspecialchars($commodity['text']) ?>">
-                                                        <?= htmlspecialchars($commodity['text']) ?></option>
+                                                        <?= htmlspecialchars($commodity['text']) ?>
+                                                    </option>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </select>

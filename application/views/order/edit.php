@@ -60,14 +60,14 @@
                                 'connote_reff'
                             ];
 
-                            foreach ($jsonFields as $field):
-                                // Jika field adalah rec_country
-                                if ($field === 'rec_country'): ?>
+                            foreach ($jsonFields as $field): ?>
+                                <?php if ($field === 'rec_country'): ?>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold small">
                                             <?= ucwords(str_replace('_', ' ', $field)) ?>
                                         </label>
-                                        <select class="form-select" name="data[<?= $field ?>]" id="rec_country">
+                                        <select class="form-control" name="data[<?= $field ?>]" id="rec_country"
+                                            style="height: calc(2.5rem + 2px); padding: 0.375rem 0.75rem;">
                                             <option value="">-- Select Country --</option>
                                             <?php foreach ($country_data as $c): ?>
                                                 <option value="<?= htmlspecialchars($c['country_name']) ?>"
@@ -78,20 +78,13 @@
                                         </select>
                                     </div>
 
+                                <?php elseif ($field === 'rec_country_code'): ?>
+                                    <input type="hidden" name="data[<?= $field ?>]" id="rec_country_code"
+                                        value="<?= htmlspecialchars($order_data[$field] ?? '') ?>">
 
                                     <?php
-                                    // Jika field adalah rec_country_code
-                                elseif ($field === 'rec_country_code'): ?>
-                                    <div class="col-md-6">
-                                        <label
-                                            class="form-label fw-semibold small"><?= ucwords(str_replace('_', ' ', $field)) ?></label>
-                                        <input type="text" class="form-control" name="data[<?= $field ?>]" id="rec_country_code"
-                                            value="<?= htmlspecialchars($order_data[$field] ?? '') ?>" disabled>
-                                    </div>
-
-                                    <?php
-                                    // Field lainnya tetap input biasa
-                                else: ?>
+                                // Field lainnya tetap input biasa
+                            else: ?>
                                     <div class="col-md-6">
                                         <label
                                             class="form-label fw-semibold small"><?= ucwords(str_replace('_', ' ', $field)) ?></label>
@@ -164,6 +157,37 @@
             });
         });
     </script>
+
+    <!-- === Tambahkan ini sekali saja (biasanya di bawah) === -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Inisialisasi Select2 agar dropdown bisa dicari
+            $('#rec_country').select2({
+                placeholder: 'Search Country...',
+                width: '100%'
+            });
+
+            // Samakan tinggi dan tampilan Select2 dengan input lain (inline style)
+            $('.select2-selection--single').attr('style',
+                'height: calc(2.5rem + 2px) !important; padding: 0.375rem 0.75rem !important; border: 1px solid #ced4da !important; border-radius: 0.375rem !important; display: flex; align-items: center; background-color: #fff;'
+            );
+            $('.select2-selection__rendered').attr('style',
+                'line-height: 2.5rem !important; font-size: 1rem !important; color: #212529;'
+            );
+
+            // Ketika negara dipilih, update field hidden rec_country_code
+            $('#rec_country').on('change', function () {
+                let code = $(this).find(':selected').data('code');
+                $('#rec_country_code').val(code || '');
+            });
+        });
+    </script>
+
+
     <?php $this->load->view('layout/footer'); ?>
     <?php $this->load->view('components/order_edit_script'); ?>
     <?php $this->load->view('components/order_edit_modal'); ?>

@@ -62,6 +62,8 @@ class User extends CI_Controller
         $data['roles'] = $roles;
         $data['page'] = 'UserCreate';
 
+        echo "<script>console.log(" . json_encode($roles) . ")</script>";
+
         if ($user->code == 'SUPER_ADMIN' || $user->code == 'ADMIN') {
             $this->load->view('base_page', $data);
         } else {

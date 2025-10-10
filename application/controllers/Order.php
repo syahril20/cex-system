@@ -56,6 +56,9 @@ class Order extends CI_Controller
             redirect('/');
         }
 
+        $status = null;
+        $latestStatus = null;
+
         if ($orders) {
             foreach ($orders as &$order) {
                 $latestStatus = null;
@@ -64,10 +67,46 @@ class Order extends CI_Controller
                     !in_array($order['status'], ['Rejected', 'Created']) &&
                     !empty($order['airwaybill'])
                 ) {
-                    $latestStatus = $this->Master_model->get_latest_tracking_status($order['airwaybill']);
-                    if (empty($latestStatus)) {
-                        $latestStatus = 'Pending';
+                    $status = $this->Master_model->get_all_trackings($order['airwaybill'] ?? []);
+                    // Dummy tracking untuk airwaybill AIN341213536
+                    if ($order['airwaybill'] === 'AIN341213536') {
+                        $status = [
+                            [
+                                'date' => '2024-06-01',
+                                'time' => '09:00',
+                                'status' => 'Picked Up'
+                            ],
+                            [
+                                'date' => '2024-06-02',
+                                'time' => '14:30',
+                                'status' => 'In Transit'
+                            ],
+                            [
+                                'date' => '2024-06-03',
+                                'time' => '18:45',
+                                'status' => 'Delivered'
+                            ]
+                        ];
                     }
+
+                    if (!empty($status) && is_array($status)) {
+                        $latestStatus = end($status)['status'] ?? 'Pending';
+                        $latestTracking = end($status);
+                        $order['status_history'] = [];
+                        foreach ($status as $tracking) {
+                            $order['status_history'][] = [
+                                'date' => ($tracking['date'] ?? '') . ' ' . ($tracking['time'] ?? ''),
+                                'status' => $tracking['status'] ?? ''
+                            ];
+                        }
+                    }
+                    // $latestStatus = $this->Master_model->get_latest_tracking_status($order['airwaybill']);
+                    // if (empty($latestStatus)) {
+                    //     $latestStatus = 'Pending';
+                    // }
+                    // if (!empty($status)) {
+                    //     $order['tracking'] = $status;                        
+                    // }
                 }
 
                 // Update status jika status saat ini Approved dan latestStatus tidak kosong/null
@@ -88,6 +127,8 @@ class Order extends CI_Controller
         $data['user'] = $user;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
+        
+        echo "<script>console.log(" . json_encode($data) . ");</script>";
 
         $this->load->view('base_page', $data);
     }
@@ -103,6 +144,9 @@ class Order extends CI_Controller
         $data['page'] = 'OrderForm';
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
+        $data['country_data'] = $this->Country_data_model->get_all();
+
+        echo "<script>console.log(" . json_encode($data) . ");</script>";
 
         if ($user->code !== 'SUPER_ADMIN') {
             $this->load->view('base_page', $data);

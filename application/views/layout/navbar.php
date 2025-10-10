@@ -53,9 +53,9 @@
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark" data-bs-theme="dark">
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="<?= site_url('/') ?>">
-        <i class="fas fa-shipping-fast me-1"></i> Cex
+        <i class="fas fa-shipping-fast me-1"></i> Jijib Express <br>
         <?php if (isset($user->role)): ?>
-            (<?= htmlspecialchars($user->role) ?>)
+            <span class="ms-2 text-muted" style="font-size: 0.95em;">(<?= htmlspecialchars($user->role) ?>)</span>
         <?php endif; ?>
     </a>
 

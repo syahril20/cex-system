@@ -32,8 +32,8 @@
                             <label for="role" class="form-label fw-bold">Role</label>
                             <select class="form-select" id="role" name="role_id" required>
                                 <?php foreach ($roles as $role): ?>
-                                    <option value="<?= htmlspecialchars($role->id) ?>" <?= $role->id == $users->role_id ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($role->name) ?>
+                                    <option value="<?= htmlspecialchars($role['id']) ?>" <?= $role['id'] == $users->role_id ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($role['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

@@ -225,6 +225,12 @@ class Master_model extends CI_Model
         return $trackings[0]['status'] ?? null;
     }
 
+    public function get_all_trackings($airwaybill)
+    {
+        $result = $this->get_tracking($airwaybill);
+        return !empty($result['trackings']) ? $result['trackings'] : [];
+    }
+
     // ============================================================
     // SHIPMENT
     // ============================================================

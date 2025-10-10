@@ -153,8 +153,19 @@
                                                             $badgeClass = 'bg-info text-dark';
                                                             break;
                                                     }
+
+                                                    // contoh history (kalau dari database tinggal ganti)
+                                                    $status_history = $o['status_history'] ?? [];
+                                                    $status_history = array_reverse($status_history); // terbaru di atas
+                                        
+                                                    // Status yang tidak bisa diklik
+                                                    $unclickable = ['pending', 'rejected', 'created'];
+                                                    $isClickable = !in_array($status, $unclickable);
                                                     ?>
-                                                    <span class="badge badge-status <?= $badgeClass ?>">
+
+                                                    <span class="badge badge-status <?= $badgeClass ?>"
+                                                        style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"
+                                                        <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>
                                                         <?= htmlspecialchars($o['status']) ?>
                                                     </span>
                                                 </td>
@@ -196,6 +207,50 @@
                                                         <?php else: ?>
                                                             <button class="btn btn-sm btn-warning" disabled>
                                                                 <i class="fas fa-upload"></i> Upload
+                                                            </button>
+                                                        <?php endif; ?>
+
+                                                        <?php
+                                                        $responseObj = json_decode($o['response']); // ubah JSON string jadi object PHP
+                                                        $printUrlThermal = $responseObj->data->printUrl ?? '';
+                                                        $printUrlA4 = $responseObj->data->printUrlA4 ?? '';
+                                                        ?>
+
+                                                        <?php if (!empty($printUrlThermal) || !empty($printUrlA4)): ?>
+                                                            <div class="btn-group">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-secondary dropdown-toggle d-inline-flex align-items-center"
+                                                                    data-bs-toggle="dropdown" aria-expanded="false" style="gap: 6px;">
+                                                                    <i class="fas fa-print"></i>
+                                                                    <span>Print</span>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm small">
+                                                                    <?php if (!empty($printUrlThermal)): ?>
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                                href="<?= htmlspecialchars($printUrlThermal, ENT_QUOTES, 'UTF-8') ?>"
+                                                                                target="_blank" rel="noopener noreferrer">
+                                                                                🧾 Print Thermal
+                                                                            </a>
+                                                                        </li>
+                                                                    <?php endif; ?>
+
+                                                                    <?php if (!empty($printUrlA4)): ?>
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                                href="<?= htmlspecialchars($printUrlA4, ENT_QUOTES, 'UTF-8') ?>"
+                                                                                target="_blank" rel="noopener noreferrer">
+                                                                                📄 Print A4
+                                                                            </a>
+                                                                        </li>
+                                                                    <?php endif; ?>
+
+                                                                </ul>
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-outline-secondary disabled" type="button"
+                                                                title="No print link available">
+                                                                <i class="fas fa-print"></i> Print
                                                             </button>
                                                         <?php endif; ?>
                                                     </div>
@@ -240,8 +295,19 @@
                                                             $badgeClass = 'bg-info text-dark';
                                                             break;
                                                     }
+
+                                                    // contoh history (kalau dari database tinggal ganti)
+                                                    $status_history = $o['status_history'] ?? [];
+                                                    $status_history = array_reverse($status_history); // terbaru di atas
+                                        
+                                                    // Status yang tidak bisa diklik
+                                                    $unclickable = ['pending', 'rejected', 'created'];
+                                                    $isClickable = !in_array($status, $unclickable);
                                                     ?>
-                                                    <span class="badge badge-status <?= $badgeClass ?>">
+
+                                                    <span class="badge badge-status <?= $badgeClass ?>"
+                                                        style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"
+                                                        <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>
                                                         <?= htmlspecialchars($o['status']) ?>
                                                     </span>
                                                 </td>
@@ -262,6 +328,50 @@
                                                                 <i class="fas fa-upload"></i> Upload
                                                             </button>
                                                         <?php endif; ?>
+
+                                                        <?php
+                                                        $responseObj = json_decode($o['response']); // ubah JSON string jadi object PHP
+                                                        $printUrlThermal = $responseObj->data->printUrl ?? '';
+                                                        $printUrlA4 = $responseObj->data->printUrlA4 ?? '';
+                                                        ?>
+
+                                                        <?php if (!empty($printUrlThermal) || !empty($printUrlA4)): ?>
+                                                            <div class="btn-group">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-secondary dropdown-toggle d-inline-flex align-items-center"
+                                                                    data-bs-toggle="dropdown" aria-expanded="false" style="gap: 6px;">
+                                                                    <i class="fas fa-print"></i>
+                                                                    <span>Print</span>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm small">
+                                                                    <?php if (!empty($printUrlThermal)): ?>
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                                href="<?= htmlspecialchars($printUrlThermal, ENT_QUOTES, 'UTF-8') ?>"
+                                                                                target="_blank" rel="noopener noreferrer">
+                                                                                🧾 Print Thermal
+                                                                            </a>
+                                                                        </li>
+                                                                    <?php endif; ?>
+
+                                                                    <?php if (!empty($printUrlA4)): ?>
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                                href="<?= htmlspecialchars($printUrlA4, ENT_QUOTES, 'UTF-8') ?>"
+                                                                                target="_blank" rel="noopener noreferrer">
+                                                                                📄 Print A4
+                                                                            </a>
+                                                                        </li>
+                                                                    <?php endif; ?>
+
+                                                                </ul>
+                                                            </div>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-outline-secondary disabled" type="button"
+                                                                title="No print link available">
+                                                                <i class="fas fa-print"></i> Print
+                                                            </button>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -279,20 +389,8 @@
     </main>
 
     <?php $this->load->view('layout/footer'); ?>
-
-    <!-- DataTables -->
     <script src="<?= base_url('assets/js/simple-datatables.min.js') ?>"></script>
-    <script>
-        // Pastikan kedua tabel diinisialisasi
-        document.addEventListener("DOMContentLoaded", function () {
-            if (document.querySelector("#datatablesSimple")) {
-                new simpleDatatables.DataTable("#datatablesSimple");
-            }
-            if (document.querySelector("#agentTable")) {
-                new simpleDatatables.DataTable("#agentTable");
-            }
-        });
-    </script>
+
 </div>
 
 <?php $this->load->view('components/order_process_modal'); ?>
