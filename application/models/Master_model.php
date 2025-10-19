@@ -69,8 +69,6 @@ class Master_model extends CI_Model
             return $this->token;
         }
 
-        echo "<script>console.log('TOKEN: ', " . json_encode($this->token) . ');</script>';
-
         $token = $this->generate_token($this->username, $this->secret_key);
         if ($token) {
             $this->token = $token;
