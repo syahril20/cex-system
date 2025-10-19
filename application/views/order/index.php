@@ -96,16 +96,52 @@
             <h1 class="mt-4 mb-4">Data Order</h1>
 
             <div class="card shadow-sm mb-4">
-                <div
-                    class="card-header d-flex flex-wrap justify-content-between align-items-center bg-primary text-white">
-                    <div class="mb-2 mb-sm-0">
-                        <i class="fas fa-truck me-1"></i> Data Order Table
+                <div class="card-header bg-primary text-white py-2 px-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+
+                        <!-- Judul -->
+                        <div class="d-flex align-items-center fw-semibold">
+                            <i class="fas fa-truck me-2"></i>
+                            <span>Data Order Table</span>
+                        </div>
+
+                        <!-- Aksi -->
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+
+                            <?php if ($user->code == 'AGENT' || $user->code == 'ADMIN'): ?>
+                                <a href="<?= site_url('order/create') ?>"
+                                    class="btn btn-light btn-sm d-flex align-items-center">
+                                    <i class="fas fa-plus me-1"></i> New Order
+                                </a>
+                            <?php endif; ?>
+
+                            <?php if ($user->code == 'ADMIN' || $user->code == 'SUPER_ADMIN'): ?>
+                                <form action="<?= site_url('order/export_excel') ?>" method="get"
+                                    class="row gx-2 gy-1 align-items-center">
+
+                                    <div class="col-12 col-sm-auto">
+                                        <input type="date" name="start_date" class="form-control form-control-sm" required>
+                                    </div>
+
+                                    <div class="col-auto text-center text-sm-start">
+                                        <span class="fw-semibold">s/d</span>
+                                    </div>
+
+                                    <div class="col-12 col-sm-auto">
+                                        <input type="date" name="end_date" class="form-control form-control-sm" required>
+                                    </div>
+
+                                    <div class="col-12 col-sm-auto">
+                                        <button type="submit"
+                                            class="btn btn-success btn-sm d-flex align-items-center w-100 w-sm-auto">
+                                            <i class="fas fa-file-excel me-1"></i>
+                                            <span>Download</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <?php if ($user->code == 'AGENT' || $user->code == 'ADMIN'): ?>
-                        <a href="<?= site_url('order/create') ?>" class="btn btn-light btn-sm">
-                            <i class="fas fa-plus"></i> New Order
-                        </a>
-                    <?php endif; ?>
                 </div>
 
                 <div class="card-body">

@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-// use GuzzleHttp\Client;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * @property CI_Session $session
@@ -22,8 +26,6 @@ class Order extends CI_Controller
         $this->load->helper(['url', 'form']);
         $this->load->helper(['activity', 'utils']);
         $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model']);
-
-        // $this->load->database(); // Uncomment if not autoloaded
     }
 
     public function index()
@@ -127,7 +129,7 @@ class Order extends CI_Controller
         $data['user'] = $user;
         $data['page'] = 'Order';
         $data['orders'] = $orders;
-        
+
         echo "<script>console.log(" . json_encode($data) . ");</script>";
 
         $this->load->view('base_page', $data);
@@ -227,16 +229,56 @@ class Order extends CI_Controller
         */
 
         // Dummy data seolah sukses dari API
-        $result = [
-            "status" => 200,
-            "msg" => "Shipment created.",
-            "data" => [
-                "code" => 395,
-                "airwaybill" => 'AIN' . mt_rand(100000000, 999999999),
-                "printUrl" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_thermal_frame/1N38",
-                "printUrlA4" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_frame/1N38"
-            ]
-        ];
+
+        try {
+            $apiResponse = $this->Master_model->create_shipment($payload);
+        } catch (Exception $e) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Gagal membuat shipment: ' . $e->getMessage(),
+                'icon' => 'error'
+            ]);
+            log_message('error', 'create_shipment exception: ' . $e->getMessage());
+            redirect('/order');
+            return;
+        }
+
+        if (empty($apiResponse) || !is_array($apiResponse)) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Response tidak valid dari Master.',
+                'icon' => 'error'
+            ]);
+            log_message('error', 'create_shipment invalid response: ' . json_encode($apiResponse));
+            redirect('/order');
+            return;
+        }
+
+        $statusCode = $apiResponse['status'] ?? null;
+        $msg = $apiResponse['msg'] ?? 'Terjadi kesalahan saat membuat shipment.';
+
+        if ($statusCode !== 200) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => $msg,
+                'icon' => 'error'
+            ]);
+            log_message('error', 'create_shipment failed: ' . json_encode($apiResponse));
+            redirect('/order');
+            return;
+        }
+
+        $result = $apiResponse;
+        // $result = [
+        //     "status" => 200,
+        //     "msg" => "Shipment created.",
+        //     "data" => [
+        //         "code" => 395,
+        //         "airwaybill" => 'AIN' . mt_rand(100000000, 999999999),
+        //         "printUrl" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_thermal_frame/1N38",
+        //         "printUrlA4" => "https://dev.office.cexsystem.com/frame/cleansing/print_connote_frame/1N38"
+        //     ]
+        // ];
 
         // Simpan ke table orders
         $orderData = [
@@ -319,10 +361,146 @@ class Order extends CI_Controller
         $this->load->view('base_page', $data);
     }
 
+    // public function do_upload()
+    // {
+    //     $airwaybill = $this->input->post('airwaybill');
+
+    //     if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Gagal!',
+    //             'text' => 'Gagal memuat file upload.',
+    //             'icon' => 'error'
+    //         ]);
+    //         log_message('error', 'File upload gagal: ' . json_encode($_FILES['filename']));
+    //         redirect('order');
+    //         return;
+    //     }
+
+    //     $file = $_FILES['filename']['tmp_name'];
+    //     $file_name = $_FILES['filename']['name'];
+
+    //     if (!$airwaybill || !$file_name) {
+
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Gagal!',
+    //             'text' => 'Airwaybill dan file harus diisi.',
+    //             'icon' => 'error'
+    //         ]);
+    //         redirect('order');
+    //         return;
+    //     }
+    //     try {
+    //         $upload_path = FCPATH . 'uploads/';
+    //         if (!is_dir($upload_path)) {
+    //             mkdir($upload_path, 0777, true);
+    //         }
+
+    //         $new_file_name = uniqid() . '_' . $file_name;
+    //         $destination = $upload_path . $new_file_name;
+
+    //         if (!move_uploaded_file($file, $destination)) {
+    //             throw new Exception("Gagal menyimpan file ke server lokal.");
+    //         }
+
+    //         // Upload file ke Master via Master_model
+    //         try {
+    //             $apiResponse = $this->Master_model->upload_shipment_image($airwaybill, $destination, true);
+    //             log_message('info', 'Master_model::upload_shipment_image response: ' . json_encode($apiResponse));
+    //         } catch (Exception $e) {
+    //             log_message('error', 'Master_model::upload_shipment_image exception: ' . $e->getMessage());
+    //             // Hapus file lokal jika sudah dibuat
+    //             if (file_exists($destination)) {
+    //                 @unlink($destination);
+    //             }
+    //             $this->session->set_flashdata('swal', [
+    //                 'title' => 'Gagal!',
+    //                 'text' => 'Gagal mengunggah file ke server Master: ' . $e->getMessage(),
+    //                 'icon' => 'error'
+    //             ]);
+    //             redirect('order');
+    //             return;
+    //         }
+
+    //         // Validasi response dari Master, jika error maka batalkan dan return swal error
+    //         $statusCode = $apiResponse['status'] ?? null;
+    //         if ($apiResponse === null || $statusCode !== 200) {
+    //             $errMsg = $apiResponse['msg'] ?? 'Terjadi kesalahan saat mengunggah ke server Master.';
+    //             log_message('error', 'Master upload failed: ' . json_encode($apiResponse));
+    //             if (file_exists($destination)) {
+    //                 @unlink($destination);
+    //             }
+    //             $this->session->set_flashdata('swal', [
+    //                 'title' => 'Gagal!',
+    //                 'text' => 'Gagal mengunggah ke Master: ' . $errMsg,
+    //                 'icon' => 'error'
+    //             ]);
+    //             redirect('order');
+    //             return;
+    //         }
+
+    //         // Jika Master mengembalikan path/URL, gunakan sebagai referensi (fallback ke lokal bila kosong)
+    //         $remote_file_path = $apiResponse['data']['file_path'] ?? null;
+    //         if ($remote_file_path) {
+    //             // Simpan juga referensi remote jika tersedia
+    //             $remote_file_path = (strpos($remote_file_path, '/') === 0) ? $remote_file_path : '/' . ltrim($remote_file_path, '/');
+    //         } else {
+    //             $remote_file_path = "/uploads/$new_file_name";
+    //         }
+
+    //         // Simpan ke DB
+    //         // Cek apakah sudah ada data dengan order_id dan airwaybill yang sama
+    //         $order_id = $this->input->post('order_id');
+    //         $existing = $this->Order_model->get_shipment_images_by_order_and_airwaybill($order_id, $airwaybill);
+
+    //         // Hapus data lama dan file-nya jika ada
+    //         foreach ($existing as $row) {
+    //             // Hapus file jika ada
+    //             $old_file = FCPATH . ltrim($row->file_path, '/');
+    //             if (file_exists($old_file)) {
+    //                 @unlink($old_file);
+    //             }
+    //             // Hapus data di DB
+    //             $this->db->delete('shipment_images', ['id' => $row->id]);
+    //         }
+
+    //         // Insert data baru
+    //         $insert = [
+    //             'id' => generate_uuid(),
+    //             "order_id" => $order_id,
+    //             "airwaybill" => $airwaybill,
+    //             "file_name" => $new_file_name,
+    //             "file_path" => '/uploads/' . $new_file_name,
+    //             "file_type" => mime_content_type($destination),
+    //             'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+    //         ];
+
+    //         $this->db->insert('shipment_images', $insert);
+
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Berhasil!',
+    //             'text' => 'Upload berhasil.',
+    //             'icon' => 'success'
+    //         ]);
+
+    //     } catch (Exception $e) {
+    //         $this->session->set_flashdata('swal', [
+    //             'title' => 'Gagal!',
+    //             'text' => 'Error: ' . $e->getMessage(),
+    //             'icon' => 'error'
+    //         ]);
+    //     }
+
+    //     log_activity($this, 'upload_shipment_image', 'Upload shipment image untuk airwaybill: ' . $airwaybill);
+
+    //     redirect('order');
+    // }
+
+
     public function do_upload()
     {
         $airwaybill = $this->input->post('airwaybill');
 
+        // --- Validasi file upload ---
         if (!isset($_FILES['filename']) || !is_uploaded_file($_FILES['filename']['tmp_name'])) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -338,7 +516,6 @@ class Order extends CI_Controller
         $file_name = $_FILES['filename']['name'];
 
         if (!$airwaybill || !$file_name) {
-
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
                 'text' => 'Airwaybill dan file harus diisi.',
@@ -347,113 +524,105 @@ class Order extends CI_Controller
             redirect('order');
             return;
         }
+
         try {
-            /**
-             * ===========================
-             * MODE DUMMY (aktif sekarang)
-             * ===========================
-             */
+            // --- Simpan file sementara ke lokal ---
             $upload_path = FCPATH . 'uploads/';
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, true);
             }
 
             $new_file_name = uniqid() . '_' . $file_name;
-            $destination = $upload_path . $new_file_name;
+            $destination = "$upload_path$new_file_name";
 
             if (!move_uploaded_file($file, $destination)) {
                 throw new Exception("Gagal menyimpan file ke server lokal.");
             }
 
-            // Dummy response mirip API eksternal
-            $dummyResponse = [
-                "status" => 200,
-                "msg" => "Upload berhasil (dummy)",
-                "data" => [
-                    "airwaybill" => $airwaybill,
-                    "file_name" => $new_file_name,
-                    "file_path" => base_url('uploads/' . $new_file_name),
-                    "file_type" => mime_content_type($destination),
-                ]
-            ];
+            // --- Upload ke Master API via Master_model ---
+            try {
+                $apiResponse = $this->Master_model->upload_shipment_image($airwaybill, $destination, true);
+                log_message('info', 'Master_model::upload_shipment_image response: ' . json_encode($apiResponse));
+            } catch (Exception $e) {
+                log_message('error', 'Master_model::upload_shipment_image exception: ' . $e->getMessage());
 
-            // Simpan ke DB
-            // Cek apakah sudah ada data dengan order_id dan airwaybill yang sama
+                // Hapus file lokal jika gagal upload ke Master
+                if (file_exists($destination)) {
+                    @unlink($destination);
+                }
+
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Gagal!',
+                    'text' => 'Gagal mengunggah file ke server Master: ' . $e->getMessage(),
+                    'icon' => 'error'
+                ]);
+                redirect('order');
+                return;
+            }
+
+            // --- Validasi hasil dari Master ---
+            $statusCode = $apiResponse['status'] ?? null;
+            if (empty($apiResponse) || $statusCode !== 200) {
+                $errMsg = $apiResponse['msg'] ?? 'Terjadi kesalahan saat mengunggah ke server Master.';
+                log_message('error', 'Master upload failed: ' . json_encode($apiResponse));
+
+                if (file_exists($destination)) {
+                    @unlink($destination);
+                }
+
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Gagal!',
+                    'text' => "Gagal mengunggah ke Master: $errMsg",
+                    'icon' => 'error'
+                ]);
+                redirect('order');
+                return;
+            }
+
+            // --- Dapatkan path file dari response Master ---
+            $remote_file_path = $apiResponse['data']['file_path'] ?? null;
+            if ($remote_file_path) {
+                $remote_file_path = (strpos($remote_file_path, '/') === 0)
+                    ? $remote_file_path
+                    : '/' . ltrim($remote_file_path, '/');
+            } else {
+                $remote_file_path = "/uploads/$new_file_name";
+            }
+
+            // --- Simpan ke DB ---
             $order_id = $this->input->post('order_id');
             $existing = $this->Order_model->get_shipment_images_by_order_and_airwaybill($order_id, $airwaybill);
 
             // Hapus data lama dan file-nya jika ada
             foreach ($existing as $row) {
-                // Hapus file jika ada
                 $old_file = FCPATH . ltrim($row->file_path, '/');
                 if (file_exists($old_file)) {
                     @unlink($old_file);
                 }
-                // Hapus data di DB
                 $this->db->delete('shipment_images', ['id' => $row->id]);
             }
 
-            // Insert data baru
             $insert = [
                 'id' => generate_uuid(),
-                "order_id" => $order_id,
-                "airwaybill" => $airwaybill,
-                "file_name" => $new_file_name,
-                "file_path" => '/uploads/' . $new_file_name,
-                "file_type" => mime_content_type($destination),
+                'order_id' => $order_id,
+                'airwaybill' => $airwaybill,
+                'file_name' => $new_file_name,
+                'file_path' => $remote_file_path,
+                'file_type' => mime_content_type($destination),
                 'created_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             ];
 
             $this->db->insert('shipment_images', $insert);
 
+            // --- Berhasil ---
             $this->session->set_flashdata('swal', [
                 'title' => 'Berhasil!',
-                'text' => 'Upload berhasil.',
+                'text' => 'Upload berhasil ke server Master.',
                 'icon' => 'success'
             ]);
 
-
-            /**
-             * ===========================
-             * MODE REAL (gunakan ini jika mau hit API eksternal)
-             * ===========================
-             */
-            /*
-            $client = new Client();
-            $response = $client->request('POST', 'https://dev.office.cexsystem.com/v2/service/shipment/upload_shipment_image', [
-                'headers' => [
-                    'Authorization' => 'Bearer <JWT_TOKEN>'
-                ],
-                'multipart' => [
-                    [
-                        'name'     => 'airwaybill',
-                        'contents' => $airwaybill
-                    ],
-                    [
-                        'name'     => 'filename',
-                        'contents' => fopen($file, 'r'),
-                        'filename' => $file_name
-                    ]
-                ]
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
-
-            // Simpan hasil ke DB
-            $insert = [
-                "order_id"    => null,
-                "airwaybill"  => $airwaybill,
-                "file_name"   => $result['data']['file_name'],
-                "file_path"   => $result['data']['file_path'],
-                "file_type"   => $result['data']['file_type'] ?? 'unknown',
-                "uploaded_by" => "system"
-            ];
-
-            $this->db->insert('shipment_images', $insert);
-
-            $this->session->set_flashdata('success', 'Upload berhasil (real API): ' . json_encode($result));
-            */
         } catch (Exception $e) {
+            log_message('error', 'Upload error: ' . $e->getMessage());
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
                 'text' => 'Error: ' . $e->getMessage(),
@@ -461,8 +630,8 @@ class Order extends CI_Controller
             ]);
         }
 
-        log_activity($this, 'upload_shipment_image', 'Upload shipment image untuk airwaybill: ' . $airwaybill);
-
+        // --- Logging aktivitas ---
+        log_activity($this, 'upload_shipment_image', "Upload shipment image untuk airwaybill: $airwaybill");
         redirect('order');
     }
 
@@ -549,7 +718,7 @@ class Order extends CI_Controller
         }
 
         if ($this->input->method() === 'post') {
-            $data = $this->input->post('data'); // Ambil data JSON
+            $data = $this->input->post('data'); // Ambil data JSON dari form
             $shipmentDetails = $data['shipment_details'] ?? [];
 
             // Validasi wajib
@@ -579,9 +748,37 @@ class Order extends CI_Controller
                 }
             }
 
-            // Update data order
+            // Siapkan payload untuk disimpan / dikirim ke Master
             $payload = array_merge($data, ['shipment_details' => $shipmentDetails]);
 
+            // Ambil code dari response order (jika ada)
+            $respObj = null;
+            $code = null;
+            if (!empty($order->response)) {
+                $respObj = json_decode($order->response, true);
+                $code = $respObj['code'] ?? $respObj['data']['code'] ?? null;
+            }
+
+            // Jika code tersedia, panggil create_shipment_with_code sehingga melakukan hit ke Master
+            if (!empty($code)) {
+                $callData = [
+                    'order_id' => $orderId,
+                    'data' => $payload
+                ];
+                $success = $this->create_shipment_with_code($code, $callData, true);
+
+                if ($success) {
+                    // create_shipment_with_code sudah melakukan update DB & flash
+                    redirect('/order/detail/' . $orderId);
+                    return;
+                } else {
+                    // Jika gagal melakukan request ke Master, tampilkan error dan jangan lanjut
+                    redirect('/order/edit/' . $orderId);
+                    return;
+                }
+            }
+
+            // Jika tidak ada code pada response, lakukan update lokal seperti biasa
             $updateData = [
                 'data' => json_encode($payload),
                 'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
@@ -604,6 +801,97 @@ class Order extends CI_Controller
         }
 
         redirect('/order');
+    }
+
+    /**
+     * Hit Master create shipment endpoint menggunakan kode yang berasal dari response order.
+     * $code diambil dari object response di table orders.response
+     * $data harus mengandung order_id dan data (payload yang akan disimpan/dikirim)
+     *
+     * Mengembalikan true jika berhasil (dan melakukan update pada tabel orders),
+     * false jika gagal.
+     */
+    public function create_shipment_with_code($code, $data, $retry = true)
+    {
+        $orderId = $data['order_id'] ?? null;
+        $payload = $data['data'] ?? [];
+
+        if (empty($orderId) || empty($payload)) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order ID atau payload tidak tersedia untuk proses create shipment.',
+                'icon' => 'error'
+            ]);
+            log_message('error', 'create_shipment_with_code invalid params: ' . json_encode($data));
+            return false;
+        }
+
+        try {
+            // Panggil model untuk membuat shipment berdasarkan code
+            // Diasumsikan Master_model memiliki method create_shipment_with_code
+            if (!method_exists($this->Master_model, 'create_shipment_with_code')) {
+                // Fallback ke create_shipment biasa (jika tidak ada)
+                $apiResponse = $this->Master_model->create_shipment($payload);
+            } else {
+                $apiResponse = $this->Master_model->create_shipment_with_code($code, $payload, $retry);
+            }
+        } catch (Exception $e) {
+            log_message('error', 'create_shipment_with_code exception: ' . $e->getMessage());
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Gagal membuat shipment ke Master: ' . $e->getMessage(),
+                'icon' => 'error'
+            ]);
+            return false;
+        }
+
+        if (empty($apiResponse) || !is_array($apiResponse)) {
+            log_message('error', 'create_shipment_with_code invalid response: ' . json_encode($apiResponse));
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Response tidak valid dari Master.',
+                'icon' => 'error'
+            ]);
+            return false;
+        }
+
+        $statusCode = $apiResponse['status'] ?? null;
+        $msg = $apiResponse['msg'] ?? 'Terjadi kesalahan saat membuat shipment.';
+
+        if ($statusCode !== 200) {
+            log_message('error', 'create_shipment_with_code failed: ' . json_encode($apiResponse));
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => $msg,
+                'icon' => 'error'
+            ]);
+            return false;
+        }
+
+        // Jika sukses, update tabel orders: data, response, airwaybill (jika ada), updated metadata
+        $update = [
+            'data' => json_encode($payload),
+            'response' => json_encode($apiResponse),
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+            'updated_by' => $this->session->userdata('user')->username ?? 'system'
+        ];
+
+        if (!empty($apiResponse['data']['airwaybill'])) {
+            $update['airwaybill'] = $apiResponse['data']['airwaybill'];
+        }
+
+        $this->db->where('id', $orderId);
+        $this->db->update('orders', $update);
+
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'Order berhasil diupdate dan shipment dibuat di Master. Airwaybill: ' . ($apiResponse['data']['airwaybill'] ?? '-'),
+            'icon' => 'success'
+        ]);
+
+        log_activity($this, 'create_shipment_with_code', 'Create shipment with code ' . $code . ' for order_id ' . $orderId);
+
+        return true;
     }
 
     public function tracking()
@@ -629,7 +917,7 @@ class Order extends CI_Controller
         $session = check_token();
         $user = $session['user'];
 
-        // Hanya SUPER_ADMIN yang boleh approve
+        // Hanya SUPER_ADMIN/ADMIN yang boleh approve
         if (!in_array($user->code, ['SUPER_ADMIN', 'ADMIN'])) {
             $this->session->set_flashdata('swal', [
                 'title' => 'Gagal!',
@@ -659,13 +947,47 @@ class Order extends CI_Controller
             'updated_by' => $user->username
         ]);
 
-        $this->session->set_flashdata('swal', [
-            'title' => 'Berhasil!',
-            'text' => 'Order berhasil di-approve.',
-            'icon' => 'success'
-        ]);
-
+        // Catat aktivitas
         log_activity($this, 'approve_order', 'Approve order dengan airwaybill: ' . $order->airwaybill);
+
+        // Coba panggil set_outbound jika airwaybill tersedia
+        if (!empty($order->airwaybill)) {
+            try {
+                $res = $this->Master_model->set_outbound($order->airwaybill, true);
+                if ($res === false) {
+                    // set_outbound mengembalikan false -> beri peringatan pada user dan log
+                    $this->session->set_flashdata('swal', [
+                        'title' => 'Peringatan!',
+                        'text' => 'Order di-approve tetapi proses set_outbound gagal. Silakan cek log untuk detail.',
+                        'icon' => 'warning'
+                    ]);
+                    log_message('error', 'set_outbound failed for airwaybill: ' . $order->airwaybill);
+                    redirect('/order');
+                    return;
+                }
+                // jika set_outbound sukses (true/anything selain false), tampilkan sukses biasa
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Berhasil!',
+                    'text' => 'Order berhasil di-approve dan dikirim ke outbound.',
+                    'icon' => 'success'
+                ]);
+            } catch (Exception $e) {
+                // Tangani exception dari set_outbound
+                log_message('error', 'set_outbound exception for ' . $order->airwaybill . ': ' . $e->getMessage());
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Peringatan!',
+                    'text' => 'Order di-approve tetapi terjadi error saat set_outbound: ' . $e->getMessage(),
+                    'icon' => 'warning'
+                ]);
+            }
+        } else {
+            // Tidak ada airwaybill — tetap sukses approve
+            $this->session->set_flashdata('swal', [
+                'title' => 'Berhasil!',
+                'text' => 'Order berhasil di-approve.',
+                'icon' => 'success'
+            ]);
+        }
 
         redirect('/order');
     }
@@ -714,6 +1036,165 @@ class Order extends CI_Controller
         log_activity($this, 'reject_order', 'Reject order dengan airwaybill: ' . $order->airwaybill);
 
         redirect('/order');
+    }
+
+    public function export_excel()
+    {
+        // Nonaktifkan error agar tidak muncul di file Excel
+        error_reporting(0);
+        ini_set('display_errors', 0);
+
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+
+        if (!$start_date || !$end_date) {
+            show_error('Tanggal awal dan akhir harus diisi.');
+        }
+
+        // Ambil data order
+        $orders = $this->Order_model->get_by_date_range($start_date, $end_date);
+
+        // Ambil data service dari database
+        $rateData = $this->Master_model->get_rates();
+        log_message('debug', 'Rates data: ' . json_encode($rateData));
+
+        $serviceTypeMap = [];
+        // Support both formats: ['data' => [...]] or plain array like [{"id":1,"text":"REGULER","rate_type":1},...]
+        $rates = [];
+        if (!empty($rateData)) {
+            $rates = $rateData['data'] ?? $rateData;
+        }
+
+        if (!empty($rates) && is_array($rates)) {
+            foreach ($rates as $r) {
+            // support array items or objects
+            $rateType = is_array($r) ? ($r['rate_type'] ?? null) : ($r->rate_type ?? null);
+            $text = is_array($r) ? ($r['text'] ?? '') : ($r->text ?? '');
+            if ($rateType !== null) {
+                $serviceTypeMap[$rateType] = strtoupper($text);
+            }
+            }
+        }
+
+        // Buat spreadsheet baru
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $headers = [
+            'A1' => 'No',
+            'B1' => 'Airwaybill',
+            'C1' => 'User ID',
+            'D1' => 'Pengirim',
+            'E1' => 'Alamat Pengirim',
+            'F1' => 'No HP Pengirim',
+            'G1' => 'Penerima',
+            'H1' => 'Alamat Penerima',
+            'I1' => 'Kota',
+            'J1' => 'Negara',
+            'K1' => 'Berat (Kg)',
+            'L1' => 'Ukuran (P x L x T)',
+            'M1' => 'Service',
+            'N1' => 'Deskripsi Barang',
+            'O1' => 'Notes',
+            'P1' => 'Barang',
+            'Q1' => 'Kategori',
+            'R1' => 'Qty',
+            'S1' => 'Harga',
+            'T1' => 'Status',
+            'U1' => 'Tanggal Dibuat',
+            'V1' => 'Dibuat Oleh'
+        ];
+
+        foreach ($headers as $cell => $label) {
+            $sheet->setCellValue($cell, $label);
+        }
+
+        $row = 2;
+        $no = 1;
+
+        foreach ($orders as $order) {
+            $data = json_decode($order->data, true);
+            $details = $data['shipment_details'] ?? [];
+
+            $totalDetail = count($details);
+            $startRow = $row;
+            $endRow = $row + ($totalDetail > 0 ? $totalDetail - 1 : 0);
+
+            // Format ukuran
+            $ukuran = ($data['length'] ?? '-') . ' x ' . ($data['width'] ?? '-') . ' x ' . ($data['height'] ?? '-');
+
+            // Mapping service type
+            $service = $serviceTypeMap[$data['service_type'] ?? ''] ?? '-';
+
+            // Isi kolom utama (sekali per airwaybill)
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $order->airwaybill);
+            $sheet->setCellValue('C' . $row, $order->user_id);
+            $sheet->setCellValue('D' . $row, $data['ship_name'] ?? '-');
+            $sheet->setCellValue('E' . $row, $data['ship_address'] ?? '-');
+            $sheet->setCellValue('F' . $row, $data['ship_phone'] ?? '-');
+            $sheet->setCellValue('G' . $row, $data['rec_name'] ?? '-');
+            $sheet->setCellValue('H' . $row, $data['rec_address'] ?? '-');
+            $sheet->setCellValue('I' . $row, $data['rec_city'] ?? '-');
+            $sheet->setCellValue('J' . $row, ($data['rec_country'] ?? '-') . ' [' . ($data['rec_country_code'] ?? '-') . ']');
+            $sheet->setCellValue('K' . $row, $data['berat'] ?? '-');
+            $sheet->setCellValue('L' . $row, $ukuran);
+            $sheet->setCellValue('M' . $row, $service);
+            $sheet->setCellValue('N' . $row, $data['goods_description'] ?? '-');
+            $sheet->setCellValue('O' . $row, $data['notes'] ?? '-');
+            $sheet->setCellValue('T' . $row, $order->status);
+            $sheet->setCellValue('U' . $row, $order->created_at);
+            $sheet->setCellValue('V' . $row, $order->created_by);
+
+            // Merge cell utama kalau ada banyak barang
+            if ($totalDetail > 1) {
+                foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'T', 'U', 'V'] as $col) {
+                    $sheet->mergeCells("{$col}{$startRow}:{$col}{$endRow}");
+                    $sheet->getStyle("{$col}{$startRow}:{$col}{$endRow}")
+                        ->getAlignment()->setVertical('top');
+                }
+            }
+
+            // Barang detail
+            if (!empty($details)) {
+                foreach ($details as $detail) {
+                    $sheet->setCellValue('P' . $row, $detail['name'] ?? '-');
+                    $sheet->setCellValue('Q' . $row, $detail['category'] ?? '-');
+                    $sheet->setCellValue('R' . $row, $detail['qty'] ?? '0');
+                    $sheet->setCellValue('S' . $row, $detail['price'] ?? '0');
+                    $row++;
+                }
+            } else {
+                $sheet->setCellValue('P' . $row, '-');
+                $sheet->setCellValue('Q' . $row, '-');
+                $sheet->setCellValue('R' . $row, '-');
+                $sheet->setCellValue('S' . $row, '-');
+                $row++;
+            }
+        }
+
+        // Styling header
+        $sheet->getStyle('A1:V1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:V1')->getAlignment()->setHorizontal('center');
+        foreach (range('A', 'V') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Bersihkan output buffer agar file tidak corrupt
+        if (ob_get_length())
+            ob_end_clean();
+
+        // Output Excel ke browser
+        $filename = 'Order_Grouped_Detail_' . $start_date . '_to_' . $end_date . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 
 }

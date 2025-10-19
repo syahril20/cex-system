@@ -64,4 +64,14 @@ class Order_model extends CI_Model
             'airwaybill' => $airwaybill
         ])->result();
     }
+
+    public function get_by_date_range($start_date, $end_date)
+    {
+        return $this->db
+            ->where('created_at >=', $start_date)
+            ->where('created_at <=', $end_date)
+            ->order_by('created_at', 'ASC')
+            ->get('orders')
+            ->result();
+    }
 }

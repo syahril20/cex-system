@@ -225,7 +225,7 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 4; // 0=off, 1=error, 2=debug, 3=info, 4=all
+$config['log_threshold'] = [1, 2]; // 0=off, 1=error, 2=debug, 3=info, 4=all
 
 /*
 |--------------------------------------------------------------------------
