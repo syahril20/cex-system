@@ -827,13 +827,29 @@ class Order extends CI_Controller
         }
 
         try {
-            // Panggil model untuk membuat shipment berdasarkan code
-            // Diasumsikan Master_model memiliki method create_shipment_with_code
-            if (!method_exists($this->Master_model, 'create_shipment_with_code')) {
-                // Fallback ke create_shipment biasa (jika tidak ada)
-                $apiResponse = $this->Master_model->create_shipment($payload);
-            } else {
+            // Jika Master_model punya method create_shipment_with_code, panggil seperti biasa
+            if (method_exists($this->Master_model, 'create_shipment_with_code')) {
                 $apiResponse = $this->Master_model->create_shipment_with_code($code, $payload, $retry);
+            } else {
+                // Jika tidak ada, update data lokal saja
+                $update = [
+                    'data' => json_encode($payload),
+                    'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+                    'updated_by' => $this->session->userdata('user')->username ?? 'system'
+                ];
+                $this->db->where('id', $orderId);
+                $this->db->update('orders', $update);
+
+                $this->session->set_flashdata('swal', [
+                    'title' => 'Berhasil!',
+                    'text' => 'Perubahan disimpan secara lokal (tidak membuat shipment di Master karena fungsi tidak tersedia).',
+                    'icon' => 'success'
+                ]);
+
+                log_activity($this, 'create_shipment_with_code', 'Skipped remote create (Master API not available) for order_id ' . $orderId);
+                log_message('warning', 'Master_model::create_shipment_with_code not available, skipped remote create for order_id ' . $orderId);
+
+                return true;
             }
         } catch (Exception $e) {
             log_message('error', 'create_shipment_with_code exception: ' . $e->getMessage());
@@ -868,24 +884,19 @@ class Order extends CI_Controller
             return false;
         }
 
-        // Jika sukses, update tabel orders: data, response, airwaybill (jika ada), updated metadata
+        // ✅ Update hanya data + updated metadata
         $update = [
             'data' => json_encode($payload),
-            'response' => json_encode($apiResponse),
             'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
             'updated_by' => $this->session->userdata('user')->username ?? 'system'
         ];
-
-        if (!empty($apiResponse['data']['airwaybill'])) {
-            $update['airwaybill'] = $apiResponse['data']['airwaybill'];
-        }
 
         $this->db->where('id', $orderId);
         $this->db->update('orders', $update);
 
         $this->session->set_flashdata('swal', [
             'title' => 'Berhasil!',
-            'text' => 'Order berhasil diupdate dan shipment dibuat di Master. Airwaybill: ' . ($apiResponse['data']['airwaybill'] ?? '-'),
+            'text' => 'Order berhasil diupdate dan shipment dibuat di Master.',
             'icon' => 'success'
         ]);
 
@@ -1067,12 +1078,12 @@ class Order extends CI_Controller
 
         if (!empty($rates) && is_array($rates)) {
             foreach ($rates as $r) {
-            // support array items or objects
-            $rateType = is_array($r) ? ($r['rate_type'] ?? null) : ($r->rate_type ?? null);
-            $text = is_array($r) ? ($r['text'] ?? '') : ($r->text ?? '');
-            if ($rateType !== null) {
-                $serviceTypeMap[$rateType] = strtoupper($text);
-            }
+                // support array items or objects
+                $rateType = is_array($r) ? ($r['rate_type'] ?? null) : ($r->rate_type ?? null);
+                $text = is_array($r) ? ($r['text'] ?? '') : ($r->text ?? '');
+                if ($rateType !== null) {
+                    $serviceTypeMap[$rateType] = strtoupper($text);
+                }
             }
         }
 
