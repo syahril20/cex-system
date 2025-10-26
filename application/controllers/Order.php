@@ -15,7 +15,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
  * @property Order_model $Order_model
  * @property Shipment_images_model $Shipment_images_model
  * @property Country_data_model $Country_data_model
- * @property Receivers_model $Receivers_model
  */
 class Order extends CI_Controller
 {
@@ -26,7 +25,7 @@ class Order extends CI_Controller
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
         $this->load->helper(['activity', 'utils']);
-        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model', 'Receivers_model']);
+        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model']);
     }
 
     public function index()
@@ -148,7 +147,6 @@ class Order extends CI_Controller
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
         $data['country_data'] = $this->Country_data_model->get_all();
-        $data['receivers'] = $this->Receivers_model->get_all();
 
         echo "<script>console.log(" . json_encode($data) . ");</script>";
 
