@@ -10,20 +10,20 @@
         }
 
         // Status badge click: tampilkan riwayat status sebagai timeline
-        const badges = document.querySelectorAll('.track-link');
+        const badges = document.querySelectorAll('.badge-status');
         badges.forEach(badge => {
             badge.addEventListener('click', function () {
-                const historyJson = this.getAttribute('data-history');
-                if (!historyJson) return;
+            const historyJson = this.getAttribute('data-history');
+            if (!historyJson) return;
 
-                const history = JSON.parse(historyJson);
+            const history = JSON.parse(historyJson);
 
-                let htmlContent = `
+            let htmlContent = `
             <div style="max-height:220px;overflow-y:auto;">
                 <ul class="timeline" style="list-style:none;padding-left:0;">
             `;
-                history.forEach((h, idx) => {
-                    htmlContent += `
+            history.forEach((h, idx) => {
+                htmlContent += `
                 <li style="position:relative;padding-left:28px;margin-bottom:18px;">
                 <span style="
                     position:absolute;
@@ -44,8 +44,8 @@
                 </div>
                 </li>
                 `;
-                });
-                htmlContent += `
+            });
+            htmlContent += `
                 </ul>
             </div>
             <style>
@@ -61,20 +61,20 @@
             </style>
             `;
 
-                Swal.fire({
-                    title: `<span style="font-size:1.1rem;">Riwayat Status <span class="badge bg-info"></span></span>`,
-                    html: htmlContent,
-                    icon: 'info',
-                    confirmButtonText: 'Tutup',
-                    width: 420,
-                    background: 'rgba(255, 255, 255, 0.75)', // semi transparan putih
-                    customClass: {
-                        popup: 'swal-ios-popup'
-                    }
-                });
+            Swal.fire({
+                title: `<span style="font-size:1.1rem;">Riwayat Status <span class="badge bg-info"></span></span>`,
+                html: htmlContent,
+                icon: 'info',
+                confirmButtonText: 'Tutup',
+                width: 420,
+                background: 'rgba(255, 255, 255, 0.75)', // semi transparan putih
+                customClass: {
+                popup: 'swal-ios-popup'
+                }
+            });
             });
         });
-    });
+        });
 
     document.addEventListener("click", function (e) {
         if (e.target.closest(".btn-process")) {
@@ -133,46 +133,6 @@
             });
         }
     });
-
-    document.addEventListener("click", function (e) {
-        if (e.target.closest(".btn-cancel")) {
-            const btn = e.target.closest(".btn-cancel");
-            const orderId = btn.getAttribute("data-id");
-
-            Swal.fire({
-                title: 'Cancel Order?',
-                text: "Pilih Batalkan atau Tetapkan order ini.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '<i class="fas fa-times"></i> Batalkan',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc3545',
-                background: 'rgba(255, 255, 255, 0.75)', // semi transparan putih
-                customClass: {
-                    popup: 'swal-ios-popup'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Cancelling...',
-                        text: 'Sedang memproses pembatalan order.',
-                        allowOutsideClick: false,
-                        background: 'rgba(255, 255, 255, 0.75)',
-                        customClass: {
-                            popup: 'swal-ios-popup'
-                        },
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    setTimeout(() => {
-                        window.location.href = "<?= site_url('order/cancel/') ?>" + orderId;
-                    }, 1500);
-                }
-            });
-        }
-    });
-
 </script>
 
 <style>

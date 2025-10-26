@@ -1208,39 +1208,4 @@ class Order extends CI_Controller
         exit;
     }
 
-    public function cancel($id)
-    {
-        $session = check_token();
-        $user = $session['user'];
-
-        $order = $this->Order_model->get_order_by_id($id);
-        if (!$order) {
-            $this->session->set_flashdata('swal', [
-                'title' => 'Gagal!',
-                'text' => 'Order tidak ditemukan.',
-                'icon' => 'error'
-            ]);
-            redirect('/order');
-            return;
-        }
-
-        // Update status order menjadi "Cancelled"
-        $this->db->where('id', $id);
-        $this->db->update('orders', [
-            'status' => 'Cancelled',
-            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
-            'updated_by' => $user->username
-        ]);
-
-        $this->session->set_flashdata('swal', [
-            'title' => 'Berhasil!',
-            'text' => 'Order berhasil dibatalkan.',
-            'icon' => 'success'
-        ]);
-
-        log_activity($this, 'cancel_order', 'Cancel order dengan airwaybill: ' . $order->airwaybill);
-
-        redirect('/order');
-    }
-
 }
