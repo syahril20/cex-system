@@ -102,7 +102,7 @@
                         <!-- Judul -->
                         <div class="d-flex align-items-center fw-semibold">
                             <i class="fas fa-truck me-2"></i>
-                            <span>Data Order</span>
+                            <span>Data Order Table</span>
                         </div>
 
                         <!-- Aksi -->
@@ -113,29 +113,6 @@
                                     class="btn btn-light btn-sm d-flex align-items-center">
                                     <i class="fas fa-plus me-1"></i> New Order
                                 </a>
-                                <form action="<?= site_url('order/export_excel_id') ?>" method="get"
-                                    class="row gx-2 gy-1 align-items-center">
-
-                                    <div class="col-12 col-sm-auto">
-                                        <input type="date" name="start_date" class="form-control form-control-sm" required>
-                                    </div>
-
-                                    <div class="col-auto text-center text-sm-start">
-                                        <span class="fw-semibold">s/d</span>
-                                    </div>
-
-                                    <div class="col-12 col-sm-auto">
-                                        <input type="date" name="end_date" class="form-control form-control-sm" required>
-                                    </div>
-
-                                    <div class="col-12 col-sm-auto">
-                                        <button type="submit"
-                                            class="btn btn-success btn-sm d-flex align-items-center w-100 w-sm-auto">
-                                            <i class="fas fa-file-excel me-1"></i>
-                                            <span>Download</span>
-                                        </button>
-                                    </div>
-                                </form>
                             <?php endif; ?>
 
                             <?php if ($user->code == 'ADMIN' || $user->code == 'SUPER_ADMIN'): ?>
@@ -325,18 +302,8 @@
                                         <tr>
                                             <th>Airwaybill</th>
                                             <th>Created At</th>
-                                            <!--<th>Status</th>-->
-                                            <th>Pengirim</th>
-                                            <th>Penerima</th>
-                                            <th>Alamat</th>
-                                            <th>Kode Pos</th>
-                                            <th>Kota</th>
-                                            <th>Telp</th>
-                                            <th>Negara</th>
-                                            <th>Deskripsi</th>
-                                            <th>Berat Aktual</th>
-                                            <th>Berat Dikenakan</th>
-                                            <th class="text-center" width="180px">Aksi</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -344,54 +311,42 @@
                                             <tr>
                                                 <td><strong><?= htmlspecialchars($o['airwaybill']) ?></strong></td>
                                                 <td><?= htmlspecialchars($o['created_at']) ?></td>
-                                                <!--<td>-->
-                                                <?php
-                                                $status = strtolower($o['status']);
-                                                switch ($status) {
-                                                    case 'pending':
-                                                        $badgeClass = 'bg-warning text-dark';
-                                                        break;
-                                                    case 'complete':
-                                                        $badgeClass = 'bg-success';
-                                                        break;
-                                                    case 'approved':
-                                                        $badgeClass = 'bg-primary text-white';
-                                                        break;
-                                                    default:
-                                                        $badgeClass = 'bg-info text-dark';
-                                                        break;
-                                                }
+                                                <td>
+                                                    <?php
+                                                    $status = strtolower($o['status']);
+                                                    switch ($status) {
+                                                        case 'pending':
+                                                            $badgeClass = 'bg-warning text-dark';
+                                                            break;
+                                                        case 'complete':
+                                                            $badgeClass = 'bg-success';
+                                                            break;
+                                                        case 'rejected':
+                                                            $badgeClass = 'bg-danger';
+                                                            break;
+                                                        case 'approved':
+                                                            $badgeClass = 'bg-primary text-white';
+                                                            break;
+                                                        default:
+                                                            $badgeClass = 'bg-info text-dark';
+                                                            break;
+                                                    }
 
-                                                // contoh history (kalau dari database tinggal ganti)
-                                                $status_history = $o['status_history'] ?? [];
-                                                $status_history = array_reverse($status_history);
-                                                // terbaru di atas
-                                    
-                                                // Status yang tidak bisa diklik
-                                                $unclickable = ['pending', 'rejected', 'created', 'cancelled'];
-                                                $isClickable = !in_array($status, $unclickable);
-                                                ?>
+                                                    // contoh history (kalau dari database tinggal ganti)
+                                                    $status_history = $o['status_history'] ?? [];
+                                                    $status_history = array_reverse($status_history); // terbaru di atas
+                                        
+                                                    // Status yang tidak bisa diklik
+                                                    $unclickable = ['pending', 'rejected', 'created'];
+                                                    $isClickable = !in_array($status, $unclickable);
+                                                    ?>
 
-                                                <!--    <span class="badge badge-status <?= $badgeClass ?>"-->
-                                                <!--        style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"-->
-                                                <!--        <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>-->
-                                                <!--        Click To Track-->
-                                                <!--    </span>-->
-
-                                                <!--</td>-->
-                                                <?php
-                                                $data = json_decode($o['data'], true); // true = hasil array associative
-                                                ?>
-                                                <td><?= htmlspecialchars($data['ship_name'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_name'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_address'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_postcode'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_city'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_phone'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['rec_country'] ?? '-') ?></td>
-                                                <td><?= htmlspecialchars($data['goods_description']) ?></td>
-                                                <td><?= htmlspecialchars($data['berat']) ?></td>
-                                                <td><?= htmlspecialchars($data['berat']) ?></td>
+                                                    <span class="badge badge-status <?= $badgeClass ?>"
+                                                        style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"
+                                                        <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>
+                                                        <?= htmlspecialchars($o['status']) ?>
+                                                    </span>
+                                                </td>
                                                 <td class="text-center">
                                                     <div class="action-buttons">
                                                         <a href="<?= site_url('order/detail/' . $o['id']) ?>"
@@ -400,28 +355,14 @@
                                                         </a>
 
                                                         <?php if (!$o['shipment_image'] && strtolower($o['status']) !== 'rejected'): ?>
-                                                            <!--<a href="<?= site_url('order/upload_form/' . $o['id']) ?>"-->
-                                                            <!--    class="btn btn-sm btn-warning">-->
-                                                            <!--    <i class="fas fa-upload"></i> Upload-->
-                                                            <!--</a>-->
-
-                                                            <a href="#statusModal"
-                                                                class="btn btn-sm btn-primary track-link <?= $badgeClass ?>"
-                                                                data-bs-toggle="modal"
-                                                                style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"
-                                                                <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>
-                                                                <i class="fas fa-search"></i> Tracking </a>
-
+                                                            <a href="<?= site_url('order/upload_form/' . $o['id']) ?>"
+                                                                class="btn btn-sm btn-warning">
+                                                                <i class="fas fa-upload"></i> Upload
+                                                            </a>
                                                         <?php else: ?>
-                                                            <!--<button class="btn btn-sm btn-warning" disabled>-->
-                                                            <!--    <i class="fas fa-upload"></i> Upload-->
-                                                            <!--</button>-->
-                                                            <a href="#statusModal"
-                                                                class="btn btn-sm btn-primary track-link <?= $badgeClass ?>"
-                                                                data-bs-toggle="modal"
-                                                                style="<?= $isClickable ? 'cursor:pointer' : 'cursor:default; opacity:0.7;' ?>"
-                                                                <?= $isClickable ? "data-history='" . json_encode($status_history) . "' data-current='" . htmlspecialchars($o['status']) . "'" : '' ?>>
-                                                                <i class="fas fa-search"></i> Tracking </a>
+                                                            <button class="btn btn-sm btn-warning" disabled>
+                                                                <i class="fas fa-upload"></i> Upload
+                                                            </button>
                                                         <?php endif; ?>
 
                                                         <?php
@@ -465,16 +406,6 @@
                                                             <button class="btn btn-sm btn-outline-secondary disabled" type="button"
                                                                 title="No print link available">
                                                                 <i class="fas fa-print"></i> Print
-                                                            </button>
-                                                        <?php endif; ?>
-                                                        <?php if ($o['status'] !== 'Cancelled'): ?>
-                                                            <button type="button" class="btn btn-sm btn-danger btn-cancel"
-                                                                data-id="<?= $o['id'] ?>">
-                                                                <i class="fas fa-check-circle"></i> Cancel
-                                                            </button>
-                                                        <?php else: ?>
-                                                            <button class="btn btn-sm btn-danger" disabled>
-                                                                <i class="fas fa-check-circle"></i> Cancel
                                                             </button>
                                                         <?php endif; ?>
                                                     </div>
