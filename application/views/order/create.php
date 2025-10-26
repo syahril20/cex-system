@@ -150,7 +150,7 @@
                     <div class="card-body row g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Weight (kg)</label>
-                            <input type="number" name="berat" value="1" step="0.01" class="form-control" required
+                            <input type="text" name="berat" value="1" step="0.01" class="form-control" required
                                 pattern="[0-9]+([.][0-9]+)?" title="Only numbers are allowed" inputmode="decimal"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
                         </div>
@@ -160,19 +160,19 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Total Qty</label>
-                            <input type="number" name="total_qty" value="1" class="form-control" required
+                            <input type="text" name="total_qty" value="1" class="form-control" required
                                 pattern="[0-9]+" title="Only numbers are allowed" inputmode="numeric"
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Total Value</label>
-                            <input type="number" name="total_value" value="10" class="form-control" required
+                            <input type="text" name="total_value" value="10" class="form-control" required
                                 pattern="[0-9]+([.][0-9]+)?" title="Only numbers are allowed" inputmode="decimal"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Goods Category</label>
-                            <input type="number" name="goods_category" value="1" class="form-control">
+                            <input type="text" name="goods_category" value="1" class="form-control">
                         </div>
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Goods Description</label>
@@ -197,15 +197,15 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Height</label>
-                            <input type="number" name="height" value="15.5" step="0.1" class="form-control">
+                            <input type="text" name="height" value="15.5" step="0.1" class="form-control">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Width</label>
-                            <input type="number" name="width" value="15.5" step="0.1" class="form-control">
+                            <input type="text" name="width" value="15.5" step="0.1" class="form-control">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Length</label>
-                            <input type="number" name="length" value="10.5" step="0.1" class="form-control">
+                            <input type="text" name="length" value="10.5" step="0.1" class="form-control">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Is Connote Reff</label>
@@ -258,12 +258,12 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label fw-bold">Qty</label>
-                                        <input type="number" name="shipment_details[0][qty]" value="1"
+                                        <input type="text" name="shipment_details[0][qty]" value="1"
                                             class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label fw-bold">Price</label>
-                                        <input type="number" name="shipment_details[0][price]" value="20"
+                                        <input type="text" name="shipment_details[0][price]" value="20"
                                             class="form-control" required>
                                     </div>
                                 </div>

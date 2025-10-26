@@ -48,11 +48,11 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Qty</label>
-                        <input type="number" name="shipment_details[${shipmentIndex}][qty]" value="1" class="form-control" required>
+                        <input type="text" name="shipment_details[${shipmentIndex}][qty]" value="1" class="form-control" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Price</label>
-                        <input type="number" name="shipment_details[${shipmentIndex}][price]" value="0" class="form-control" required>
+                        <input type="text" name="shipment_details[${shipmentIndex}][price]" value="0" class="form-control" required>
                     </div>
                 </div>
             `;
