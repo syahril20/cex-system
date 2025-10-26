@@ -128,6 +128,8 @@
                                         <input type="date" name="end_date" class="form-control form-control-sm" required>
                                     </div>
 
+                                    <input type="hidden" name="user_id" value="<?= $user->id ?>">
+
                                     <div class="col-12 col-sm-auto">
                                         <button type="submit"
                                             class="btn btn-success btn-sm d-flex align-items-center w-100 w-sm-auto">
