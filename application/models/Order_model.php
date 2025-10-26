@@ -74,4 +74,18 @@ class Order_model extends CI_Model
             ->get('orders')
             ->result();
     }
+        public function get_by_date_range_id($start_date, $end_date)
+    {
+        $id_user = $this->session->userdata('user_id');
+        
+        return $this->db
+            ->where('user_id', $id_user)
+            ->where('created_at >=', $start_date)
+            ->where('created_at <=', $end_date)
+            ->order_by('created_at', 'ASC')
+            ->get('orders')
+            ->result();
+    }
+    
+    
 }
