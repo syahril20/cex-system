@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
  * @property Order_model $Order_model
  * @property Shipment_images_model $Shipment_images_model
  * @property Country_data_model $Country_data_model
+ * @property Receivers_model $Receivers_model
  */
 class Order extends CI_Controller
 {
@@ -25,7 +26,7 @@ class Order extends CI_Controller
         $this->load->library('form_validation');
         $this->load->helper(['url', 'form']);
         $this->load->helper(['activity', 'utils']);
-        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model']);
+        $this->load->model(['Master_model', 'Order_model', 'Shipment_images_model', 'Country_data_model', 'Receivers_model']);
     }
 
     public function index()
@@ -147,6 +148,7 @@ class Order extends CI_Controller
         $data['rates'] = $this->Master_model->get_rates();
         $data['commodities'] = $this->Master_model->get_commodity();
         $data['country_data'] = $this->Country_data_model->get_all();
+        $data['receivers'] = $this->Receivers_model->get_all() ?: [''];
 
         echo "<script>console.log(" . json_encode($data) . ");</script>";
 
@@ -1207,164 +1209,40 @@ class Order extends CI_Controller
         $writer->save('php://output');
         exit;
     }
-    
-      public function export_excel_id()
+
+    public function cancel($id)
     {
-        // Nonaktifkan error agar tidak muncul di file Excel
-        error_reporting(0);
-        ini_set('display_errors', 0);
+        $session = check_token();
+        $user = $session['user'];
 
-        $start_date = $this->input->get('start_date');
-        $end_date = $this->input->get('end_date');
-
-        if (!$start_date || !$end_date) {
-            show_error('Tanggal awal dan akhir harus diisi.');
+        $order = $this->Order_model->get_order_by_id($id);
+        if (!$order) {
+            $this->session->set_flashdata('swal', [
+                'title' => 'Gagal!',
+                'text' => 'Order tidak ditemukan.',
+                'icon' => 'error'
+            ]);
+            redirect('/order');
+            return;
         }
 
-        // Ambil data order
-        $orders = $this->Order_model->get_by_date_range_id($start_date, $end_date);
+        // Update status order menjadi "Cancelled"
+        $this->db->where('id', $id);
+        $this->db->update('orders', [
+            'status' => 'Cancelled',
+            'updated_at' => gmdate('Y-m-d H:i:s', time() + 7 * 3600),
+            'updated_by' => $user->username
+        ]);
 
-        // Ambil data service dari database
-        $rateData = $this->Master_model->get_rates();
-        log_message('debug', 'Rates data: ' . json_encode($rateData));
+        $this->session->set_flashdata('swal', [
+            'title' => 'Berhasil!',
+            'text' => 'Order berhasil dibatalkan.',
+            'icon' => 'success'
+        ]);
 
-        $serviceTypeMap = [];
-        // Support both formats: ['data' => [...]] or plain array like [{"id":1,"text":"REGULER","rate_type":1},...]
-        $rates = [];
-        if (!empty($rateData)) {
-            $rates = $rateData['data'] ?? $rateData;
-        }
+        log_activity($this, 'cancel_order', 'Cancel order dengan airwaybill: ' . $order->airwaybill);
 
-        if (!empty($rates) && is_array($rates)) {
-            foreach ($rates as $r) {
-                // support array items or objects
-                $rateType = is_array($r) ? ($r['rate_type'] ?? null) : ($r->rate_type ?? null);
-                $text = is_array($r) ? ($r['text'] ?? '') : ($r->text ?? '');
-                if ($rateType !== null) {
-                    $serviceTypeMap[$rateType] = strtoupper($text);
-                }
-            }
-        }
-
-        // Buat spreadsheet baru
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Header kolom
-        $headers = [
-            'A1' => 'No',
-            'B1' => 'Airwaybill',
-            'C1' => 'User ID',
-            'D1' => 'Pengirim',
-            'E1' => 'Alamat Pengirim',
-            'F1' => 'No HP Pengirim',
-            'G1' => 'Penerima',
-            'H1' => 'Alamat Penerima',
-            'I1' => 'Kota',
-            'J1' => 'Negara',
-            'K1' => 'Berat (Kg)',
-            'L1' => 'Ukuran (P x L x T)',
-            'M1' => 'Service',
-            'N1' => 'Deskripsi Barang',
-            'O1' => 'Notes',
-            'P1' => 'Barang',
-            'Q1' => 'Kategori',
-            'R1' => 'Qty',
-            'S1' => 'Harga',
-            'T1' => 'Status',
-            'U1' => 'Tanggal Dibuat',
-            'V1' => 'Dibuat Oleh'
-        ];
-
-        foreach ($headers as $cell => $label) {
-            $sheet->setCellValue($cell, $label);
-        }
-
-        $row = 2;
-        $no = 1;
-
-        foreach ($orders as $order) {
-            $data = json_decode($order->data, true);
-            $details = $data['shipment_details'] ?? [];
-
-            $totalDetail = count($details);
-            $startRow = $row;
-            $endRow = $row + ($totalDetail > 0 ? $totalDetail - 1 : 0);
-
-            // Format ukuran
-            $ukuran = ($data['length'] ?? '-') . ' x ' . ($data['width'] ?? '-') . ' x ' . ($data['height'] ?? '-');
-
-            // Mapping service type
-            $service = $serviceTypeMap[$data['service_type'] ?? ''] ?? '-';
-
-            // Isi kolom utama (sekali per airwaybill)
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $order->airwaybill);
-            $sheet->setCellValue('C' . $row, $order->user_id);
-            $sheet->setCellValue('D' . $row, $data['ship_name'] ?? '-');
-            $sheet->setCellValue('E' . $row, $data['ship_address'] ?? '-');
-            $sheet->setCellValue('F' . $row, $data['ship_phone'] ?? '-');
-            $sheet->setCellValue('G' . $row, $data['rec_name'] ?? '-');
-            $sheet->setCellValue('H' . $row, $data['rec_address'] ?? '-');
-            $sheet->setCellValue('I' . $row, $data['rec_city'] ?? '-');
-            $sheet->setCellValue('J' . $row, ($data['rec_country'] ?? '-') . ' [' . ($data['rec_country_code'] ?? '-') . ']');
-            $sheet->setCellValue('K' . $row, $data['berat'] ?? '-');
-            $sheet->setCellValue('L' . $row, $ukuran);
-            $sheet->setCellValue('M' . $row, $service);
-            $sheet->setCellValue('N' . $row, $data['goods_description'] ?? '-');
-            $sheet->setCellValue('O' . $row, $data['notes'] ?? '-');
-            $sheet->setCellValue('T' . $row, $order->status);
-            $sheet->setCellValue('U' . $row, $order->created_at);
-            $sheet->setCellValue('V' . $row, $order->created_by);
-
-            // Merge cell utama kalau ada banyak barang
-            if ($totalDetail > 1) {
-                foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'T', 'U', 'V'] as $col) {
-                    $sheet->mergeCells("{$col}{$startRow}:{$col}{$endRow}");
-                    $sheet->getStyle("{$col}{$startRow}:{$col}{$endRow}")
-                        ->getAlignment()->setVertical('top');
-                }
-            }
-
-            // Barang detail
-            if (!empty($details)) {
-                foreach ($details as $detail) {
-                    $sheet->setCellValue('P' . $row, $detail['name'] ?? '-');
-                    $sheet->setCellValue('Q' . $row, $detail['category'] ?? '-');
-                    $sheet->setCellValue('R' . $row, $detail['qty'] ?? '0');
-                    $sheet->setCellValue('S' . $row, $detail['price'] ?? '0');
-                    $row++;
-                }
-            } else {
-                $sheet->setCellValue('P' . $row, '-');
-                $sheet->setCellValue('Q' . $row, '-');
-                $sheet->setCellValue('R' . $row, '-');
-                $sheet->setCellValue('S' . $row, '-');
-                $row++;
-            }
-        }
-
-        // Styling header
-        $sheet->getStyle('A1:V1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:V1')->getAlignment()->setHorizontal('center');
-        foreach (range('A', 'V') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // Bersihkan output buffer agar file tidak corrupt
-        if (ob_get_length())
-            ob_end_clean();
-
-        // Output Excel ke browser
-        $filename = 'Order_Grouped_Detail_' . $start_date . '_to_' . $end_date . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"{$filename}\"");
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
-        exit;
+        redirect('/order');
     }
 
 }
