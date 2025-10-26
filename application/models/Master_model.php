@@ -196,6 +196,11 @@ class Master_model extends CI_Model
     {
         return $this->send_request(getenv('API_CEX_RATES_ENDPOINT'));
     }
+    
+        public function get_rates_id()
+    {
+        return $this->send_request(getenv('API_CEX_RATES_ENDPOINT'));
+    }
 
     public function get_commodity()
     {
